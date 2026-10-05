@@ -333,7 +333,12 @@ def confirm_task(root: Path, task_id: str, evidence_file: str | Path) -> Path:
                     raise ValueError("approved cards need finite run, runtime and cost limits")
             max_runs += float(limits["max_runs"])
             max_cost += float(limits["max_cost_usd"])
-            max_seconds += float(limits["max_runs"]) * float(limits["max_runtime_seconds"])
+            # The reviewed GPU-hour budget is the declared training budget.
+            # Runtime timeout also covers compile/evaluation overhead and is
+            # therefore tracked separately rather than charged as training.
+            max_seconds += float(limits["max_runs"]) * float(
+                limits.get("training_seconds_per_run", limits["max_runtime_seconds"])
+            )
         if max_runs > float(budget["max_runs"]) or max_cost > float(budget["max_cost_usd"]) or max_seconds > float(budget["max_gpu_hours"]) * 3600:
             raise ValueError("card limits exceed the reviewed total task budget")
         report = audit(root, task_id)

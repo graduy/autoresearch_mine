@@ -212,7 +212,6 @@ def main(argv: list[str] | None = None) -> int:
             print(build_manifest(root, args.experiment))
             return 0
     if args.command == "pipeline":
-        from .workflow import state as workflow_state
         routes = json.loads((root / "config" / "skill_routes.json").read_text(encoding="utf-8"))
         if args.pipeline_command == "status":
             current = workflow_state(root, args.experiment)

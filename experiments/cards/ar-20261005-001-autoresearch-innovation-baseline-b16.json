@@ -1,0 +1,64 @@
+{
+  "acceptance_rule": "record both seeds if they complete without protocol or integrity violation; this is a reference, not an improvement claim",
+  "base_commit": "78c13daecb067f07a6e11f6ca4adce07e55f5ac1",
+  "code_id": "baseline-rtx4060-b16-seeded-78c13daecb06",
+  "code_root": "/home/grady/forautoresearch/tasks/AR-20261005-001-autoresearch-innovation/code/baseline/baseline-rtx4060-b16-seeded-78c13daecb06",
+  "constraints": {
+    "max_cost_usd": 0.0,
+    "max_runs": 2,
+    "max_runtime_seconds": 600,
+    "max_vram_gb": 7.6171875,
+    "training_seconds_per_run": 300
+  },
+  "dataset_manifest_hash": "prepared-cache-verified-20261004",
+  "evaluation_script": "prepare.py:evaluate_bpb",
+  "experiment_id": "ar-20261005-001-autoresearch-innovation-baseline-b16",
+  "human_approval": {
+    "required": true,
+    "status": "pending"
+  },
+  "hypothesis": "The locked RTX 4060 batch-16 SSSL implementation can reproduce a traceable five-minute reference under the fixed evaluator.",
+  "metric_direction": "minimize",
+  "primary_metric": "val_bpb",
+  "protocol_changes": [
+    "DEVICE_BATCH_SIZE 128 -> 16",
+    "seed exposed through AUTORESEARCH_SEED"
+  ],
+  "secondary_metrics": [
+    "training_seconds",
+    "peak_vram_mb",
+    "total_tokens_M",
+    "num_steps"
+  ],
+  "seeds": [
+    42,
+    43
+  ],
+  "source_papers": [
+    {
+      "role": "protocol reference",
+      "title": "karpathy/autoresearch fixed protocol",
+      "url": "https://github.com/karpathy/autoresearch"
+    }
+  ],
+  "stages": {
+    "baseline": {
+      "command": [
+        "uv",
+        "run",
+        "train.py"
+      ],
+      "metric_pattern": "^val_bpb:\\s*([0-9.]+)",
+      "vram_pattern": "^peak_vram_mb:\\s*([0-9.]+)"
+    }
+  },
+  "stop_rule": "stop after two baseline runs, an integrity failure, or the declared budget",
+  "task_id": "AR-20261005-001-autoresearch-innovation",
+  "title": "RTX 4060 batch-16 SSSL baseline verification",
+  "upstream_comparable": false,
+  "workspace_root": "/home/grady/forautoresearch",
+  "baseline_seeds": [
+    42,
+    43
+  ]
+}

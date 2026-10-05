@@ -41,7 +41,12 @@ def _candidate_rejected(runs: list[dict[str, Any]], stage: str) -> bool:
     return bool(stage_runs) and not _kept(runs, stage) and any(run.get("status") == "discard" for run in stage_runs)
 
 
-def _stage_ready_after(card: dict[str, Any], runs: list[dict[str, Any]], stage: str) -> tuple[bool, str | None]:
+def _stage_ready_after(
+    card: dict[str, Any],
+    runs: list[dict[str, Any]],
+    stage: str,
+    reference_runs: list[dict[str, Any]] | None = None,
+) -> tuple[bool, str | None]:
     """Return whether a stage may run and explain the first unmet dependency."""
     stages = card["stages"]
     if stage == "baseline":
@@ -49,7 +54,10 @@ def _stage_ready_after(card: dict[str, Any], runs: list[dict[str, Any]], stage: 
     if stage == "pilot":
         if "baseline" in stages and not _kept(runs, "baseline"):
             return False, "a valid baseline keep is required before pilot"
-        if "baseline" not in stages and card.get("reference_metric") is None:
+        if "baseline" not in stages and card.get("reference_experiment_id"):
+            if not _kept(reference_runs or [], "baseline"):
+                return False, "the referenced baseline experiment needs a valid baseline keep before pilot"
+        elif "baseline" not in stages and card.get("reference_metric") is None:
             return False, "pilot needs either a valid baseline or a locked reference_metric"
         return True, None
     if stage == "full":
@@ -75,6 +83,7 @@ def state(root: str | Path, experiment_id: str) -> dict[str, Any]:
     project = _project(root)
     ledger = Ledger(root / project["ledger_path"])
     runs = ledger.runs(experiment_id)
+    reference_runs = ledger.runs(card["reference_experiment_id"]) if card.get("reference_experiment_id") else []
     approval = ledger.latest_approval(experiment_id)
     report_path = root / "reports" / f"{experiment_id}-draft.md"
     archive_path = root / "artifacts" / "archives" / experiment_id
@@ -102,15 +111,22 @@ def state(root: str | Path, experiment_id: str) -> dict[str, Any]:
     configured = [stage for stage in ("baseline", "pilot", "full", "multi_seed") if stage in card["stages"]]
     for stage in configured:
         kept = _kept(runs, stage)
-        if stage == "multi_seed":
+        if stage == "baseline":
+            declared = card.get("baseline_seeds", [])
+        elif stage == "full":
+            declared = card.get("full_seeds", [])
+        elif stage == "multi_seed":
             declared = card.get("seeds", [])
+        else:
+            declared = []
+        if declared:
             completed_seeds = {run.get("seed") for run in kept}
             if declared and all(seed in completed_seeds for seed in declared):
                 continue
         elif kept:
             continue
 
-        ready, reason = _stage_ready_after(card, runs, stage)
+        ready, reason = _stage_ready_after(card, runs, stage, reference_runs)
         if not ready:
             return {**base, "state": "blocked", "next_stage": stage,
                     "next_action": "resolve the stage dependency",

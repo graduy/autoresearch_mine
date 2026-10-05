@@ -1,0 +1,99 @@
+{
+  "acceptance_rule": "pilot is exploratory; proceed only if fresh baseline evidence exists, the candidate completes within 600 seconds and 7800 MiB, and val_bpb is lower than the paired baseline reference",
+  "base_commit": "b19957560efc3422610741d0bce3ea5864728282",
+  "code_id": "variant-gated-attention-headwise-b19957560efc",
+  "code_root": "/home/grady/forautoresearch/tasks/AR-20261005-001-autoresearch-innovation/code/variants/variant-gated-attention-headwise-b19957560efc",
+  "constraints": {
+    "max_cost_usd": 0.0,
+    "max_runs": 6,
+    "max_runtime_seconds": 600,
+    "max_vram_gb": 7.6171875,
+    "training_seconds_per_run": 300
+  },
+  "dataset_manifest_hash": "prepared-cache-verified-20261004",
+  "evaluation_script": "prepare.py:evaluate_bpb",
+  "experiment_id": "ar-20261005-001-autoresearch-innovation-gated-attention",
+  "human_approval": {
+    "required": true,
+    "status": "pending"
+  },
+  "hypothesis": "A query-dependent headwise sigmoid gate after attention may improve val_bpb under the fixed 300-second local protocol without changing data, evaluator, tokenizer, context, total batch, or dependencies.",
+  "independent_test": "TBD",
+  "metric_direction": "minimize",
+  "primary_metric": "val_bpb",
+  "protocol_changes": [
+    "add zero-initialized query-dependent headwise attention output gate in train.py"
+  ],
+  "reference_experiment_id": "ar-20261005-001-autoresearch-innovation-baseline-b16",
+  "reference_metric": 1.698031,
+  "reference_source": "historical batch-16 seed-42 value; fresh baseline verification is required before interpretation",
+  "secondary_metrics": [
+    "training_seconds",
+    "peak_vram_mb",
+    "total_tokens_M",
+    "num_steps"
+  ],
+  "seeds": [
+    44,
+    45,
+    46
+  ],
+  "source_papers": [
+    {
+      "role": "architecture hypothesis",
+      "title": "Gated Attention for Large Language Models",
+      "url": "https://arxiv.org/abs/2505.06708"
+    },
+    {
+      "role": "gate placement reference",
+      "title": "Official gated attention implementation",
+      "url": "https://github.com/qiuzh20/gated_attention"
+    }
+  ],
+  "stages": {
+    "full": {
+      "command": [
+        "uv",
+        "run",
+        "train.py"
+      ],
+      "metric_pattern": "^val_bpb:\\s*([0-9.]+)",
+      "vram_pattern": "^peak_vram_mb:\\s*([0-9.]+)"
+    },
+    "multi_seed": {
+      "command": [
+        "uv",
+        "run",
+        "train.py"
+      ],
+      "metric_pattern": "^val_bpb:\\s*([0-9.]+)",
+      "vram_pattern": "^peak_vram_mb:\\s*([0-9.]+)"
+    },
+    "pilot": {
+      "command": [
+        "uv",
+        "run",
+        "train.py"
+      ],
+      "metric_pattern": "^val_bpb:\\s*([0-9.]+)",
+      "vram_pattern": "^peak_vram_mb:\\s*([0-9.]+)"
+    }
+  },
+  "stop_rule": "stop on OOM, timeout, missing metric, integrity failure, or a pilot that does not improve the paired reference",
+  "task_id": "AR-20261005-001-autoresearch-innovation",
+  "title": "Headwise gated attention on RTX 4060 batch-16 autoresearch",
+  "upstream_comparable": false,
+  "workspace_root": "/home/grady/forautoresearch",
+  "pilot_seeds": [
+    42
+  ],
+  "full_seeds": [
+    42,
+    43
+  ],
+  "multi_seed_seeds": [
+    44,
+    45,
+    46
+  ]
+}
