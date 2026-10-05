@@ -1,0 +1,38 @@
+{
+  "before": {
+    "allowed_change_paths": [
+      "train.py"
+    ],
+    "branch": "autoresearch/lab-20261005",
+    "code_root": "/home/grady/.codex/local-repos/autoresearch",
+    "head": "78c13daecb067f07a6e11f6ca4adce07e55f5ac1",
+    "protected_hashes": {
+      "prepare.py": "4f2ba9cbb8ba8c4a3d35be405a913e2f3be3af9aea103ed52ef7b2a662058150",
+      "pyproject.toml": "675c150a9e0769f0e39a43eb7d836934266fa348d6e2403521f1ff99f9b9f1af",
+      "uv.lock": "03174c5cce6387418c5b6cc9bbe8f71ad0ae1e1d6fedeaecae5cdcf7321da0a3"
+    },
+    "status_porcelain": ""
+  },
+  "code_root": "/home/grady/.codex/local-repos/autoresearch",
+  "command": [
+    "uv",
+    "run",
+    "train.py"
+  ],
+  "experiment_id": "nanochat-rtx4060-b16",
+  "gpu_preflight": {
+    "available": true,
+    "foreign_processes": [],
+    "passed": true,
+    "processes": [
+      {
+        "name": "/opt/google/chrome/chrome --type=gpu-process --no-sandbox --disable-dev-shm-usage --ozone-platform=x11 --crashpad-handler-pid=4361 --enable-crash-reporter=? --user-data-dir=/home/grady/.chrome-ai --change-stack-guard-on-fork=enable --gpu-preferences=UAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAYAAAAAAAAABgAAAAAAAAAAQAAAAAAAAAIAAAAAAAAAAgAAAAAAAAA --shared-files --metrics-shmem-handle=4?i?1974630118323333517?12656929341358906781?262144 --field-trial-handle=3?i?3757400245161740371?7777340035510252423?262144 --variations-seed-version=20261003-030037.230000-production --pseudonymization-salt-handle=7?i?9400796553589044609?68685235085038642?4 --trace-process-track-uuid=3190708988185955192",
+        "pid": 4921,
+        "used_memory_mb": 13
+      }
+    ]
+  },
+  "run_id": "nanochat-rtx4060-b16-baseline-42-af269448",
+  "seed": 42,
+  "stage": "baseline"
+}

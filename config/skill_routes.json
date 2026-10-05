@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "purpose": "Map the requested end-to-end research workflow to verified local skills and evidence-bound adapters.",
+  "verified_local_skills": {
+    "autoresearch": {
+      "path": "/home/grady/.codex/skills/autoresearch/SKILL.md",
+      "role": "fixed evaluation, experiment protocol, train.py boundary"
+    },
+    "daily_papers": {
+      "path": "/home/grady/.codex/skills/daily-papers/SKILL.md",
+      "role": "paper fetch, review and notes pipeline"
+    },
+    "paper_reader": {
+      "path": "/home/grady/.codex/skills/paper-reader/SKILL.md",
+      "role": "paper analysis, equations, figures and evidence extraction"
+    },
+    "ppt_master": {
+      "path": "/home/grady/.codex/skills/ppt-master/SKILL.md",
+      "role": "presentation narrative, layout and editable PPTX handoff"
+    },
+    "sivia": {
+      "path": "/home/grady/.codex/plugins/cache/sivia-local/sivia/1.2.0/skills",
+      "role": "source-grounded scientific figures and figure review"
+    }
+  },
+  "route_map": [
+    {
+      "stage": "ideation",
+      "image_skill_name": "scientific-brainstorming",
+      "status": "adapter",
+      "implementation": "experiment card hypothesis + innovation candidate list",
+      "human_gate": "direction and budget approval"
+    },
+    {
+      "stage": "literature",
+      "image_skill_name": "nature-academic-search / literature-review",
+      "status": "adapter",
+      "implementation": "daily-papers + paper-reader + source_papers in card",
+      "human_gate": "relevance and access check"
+    },
+    {
+      "stage": "orchestration",
+      "image_skill_name": "academic-research-suite",
+      "status": "adapter",
+      "implementation": "workflow/gate.py + labctl workflow + SQLite ledger",
+      "human_gate": "approval before server or run"
+    },
+    {
+      "stage": "statistics",
+      "image_skill_name": "statistical-analysis",
+      "status": "integrated_local_adapter",
+      "implementation": "labctl analysis; descriptive stats and bootstrap CI only when n permits",
+      "human_gate": "analysis review before claims"
+    },
+    {
+      "stage": "figures",
+      "image_skill_name": "cell-su7 / cell-CNS-figure",
+      "status": "replacement",
+      "implementation": "Sivia for schematics; standard plotting for real results",
+      "human_gate": "source and visual audit"
+    },
+    {
+      "stage": "manuscript",
+      "image_skill_name": "nature-writing / nature-polishing / nature-reviewer / nature-response / nature-data",
+      "status": "handoff_adapter",
+      "implementation": "evidence manifest + paper_input.md + claim boundary; exact named skills not installed",
+      "human_gate": "author review and claim audit"
+    },
+    {
+      "stage": "presentation",
+      "image_skill_name": "nature-paper2ppt",
+      "status": "replacement",
+      "implementation": "ppt-master + Sivia; pipeline emits ppt_brief.md from the evidence manifest",
+      "human_gate": "visual review before delivery"
+    },
+    {
+      "stage": "progress",
+      "image_skill_name": "not listed",
+      "status": "integrated_local_adapter",
+      "implementation": "labctl summary weekly + boss_update.md + existing heartbeat",
+      "human_gate": "human approval requests remain explicit"
+    }
+  ],
+  "exact_image_names_found": [],
+  "boundaries": [
+    "literature is hypothesis input, not measured improvement",
+    "generated figures cannot represent empirical data",
+    "missing evidence remains TBD",
+    "PPT narrative may be persuasive but cannot invent metrics, curves or samples"
+  ]
+}

@@ -1,0 +1,45 @@
+W1005 02:36:45.553000 194744 .venv/lib/python3.10/site-packages/torch/_inductor/utils.py:1613] [0/0] Not enough SMs to use max_autotune_gemm mode
+Traceback (most recent call last):
+  File "/home/grady/.codex/local-repos/autoresearch/train.py", line 550, in <module>
+    loss = model(x, y)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py", line 414, in __call__
+    return super().__call__(*args, **kwargs)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py", line 832, in compile_wrapper
+    return fn(*args, **kwargs)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/grady/.codex/local-repos/autoresearch/train.py", line 268, in forward
+    def forward(self, idx, targets=None, reduction='mean'):
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py", line 1044, in _fn
+    return fn(*args, **kwargs)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_functorch/aot_autograd.py", line 1130, in forward
+    return compiled_fn(full_args)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_functorch/_aot_autograd/runtime_wrappers.py", line 339, in runtime_wrapper
+    all_outs = call_func_at_runtime_with_args(
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_functorch/_aot_autograd/utils.py", line 129, in call_func_at_runtime_with_args
+    out = normalize_as_list(f(args))
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_functorch/_aot_autograd/utils.py", line 103, in g
+    return f(*args)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/autograd/function.py", line 581, in apply
+    return super().apply(*args, **kwargs)  # type: ignore[misc]
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_functorch/_aot_autograd/runtime_wrappers.py", line 2118, in forward
+    fw_outs = call_func_at_runtime_with_args(
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_functorch/_aot_autograd/utils.py", line 129, in call_func_at_runtime_with_args
+    out = normalize_as_list(f(args))
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_functorch/_aot_autograd/runtime_wrappers.py", line 526, in wrapper
+    return compiled_fn(runtime_args)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_functorch/_aot_autograd/runtime_wrappers.py", line 724, in inner_fn
+    outs = compiled_fn(args)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_inductor/output_code.py", line 613, in __call__
+    return self.current_callable(inputs)
+  File "/home/grady/.codex/local-repos/autoresearch/.venv/lib/python3.10/site-packages/torch/_inductor/utils.py", line 3017, in run
+    out = model(new_inputs)
+  File "/tmp/torchinductor_grady/f6/cf6cgxtjzkerfj3jxn4jf3x3fzw5kez63ffreji4un72dcutxrvp.py", line 2719, in call
+    buf302 = empty_strided_cuda((32768, 8192), (8192, 1), torch.bfloat16)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 512.00 MiB. GPU 0 has a total capacity of 7.60 GiB of which 548.12 MiB is free. Process 4921 has 13.47 MiB memory in use. Including non-PyTorch memory, this process has 5.85 GiB memory in use. Process 195714 has 490.00 MiB memory in use. Of the allocated memory 5.29 GiB is allocated by PyTorch, and 441.99 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

@@ -1,0 +1,75 @@
+{
+  "acceptance_rule": "keep only if val_bpb is lower than the recorded batch-16 reference under a clean integrity receipt",
+  "base_commit": "78c13da",
+  "constraints": {
+    "max_cost_usd": 0.0,
+    "max_runs": 6,
+    "max_runtime_seconds": 660,
+    "max_vram_gb": 7.7
+  },
+  "dataset_manifest_hash": "same_as_nanochat-rtx4060-b16",
+  "evaluation_script": "prepare.py:evaluate_bpb",
+  "experiment_id": "nanochat-window-slll-b16",
+  "human_approval": {
+    "required": true,
+    "status": "pending"
+  },
+  "hypothesis": "Replacing the SSSL attention-window allocation with SLLL may improve validation bits per byte under the same batch-16 hardware-adapted budget.",
+  "metric_direction": "minimize",
+  "primary_metric": "val_bpb",
+  "protocol_changes": [
+    "DEVICE_BATCH_SIZE 128 -> 16",
+    "WINDOW_PATTERN SSSL -> SLLL"
+  ],
+  "reference_experiment_id": "nanochat-rtx4060-b16",
+  "reference_metric": 1.698031,
+  "secondary_metrics": [
+    "training_seconds",
+    "peak_vram_mb",
+    "num_steps"
+  ],
+  "seeds": [
+    17,
+    42,
+    3407
+  ],
+  "source_papers": [
+    {
+      "role": "small-compute protocol boundary",
+      "title": "autoresearch README small-compute guidance",
+      "url": "https://github.com/karpathy/autoresearch#platform-support"
+    }
+  ],
+  "stages": {
+    "full": {
+      "command": [
+        "uv",
+        "run",
+        "train.py"
+      ],
+      "metric_pattern": "^val_bpb:\\s*([0-9.]+)",
+      "vram_pattern": "^peak_vram_mb:\\s*([0-9.]+)"
+    },
+    "multi_seed": {
+      "command": [
+        "uv",
+        "run",
+        "train.py"
+      ],
+      "metric_pattern": "^val_bpb:\\s*([0-9.]+)",
+      "vram_pattern": "^peak_vram_mb:\\s*([0-9.]+)"
+    },
+    "pilot": {
+      "command": [
+        "uv",
+        "run",
+        "train.py"
+      ],
+      "metric_pattern": "^val_bpb:\\s*([0-9.]+)",
+      "vram_pattern": "^peak_vram_mb:\\s*([0-9.]+)"
+    }
+  },
+  "stop_rule": "stop after six candidate runs, an integrity failure, or the configured budget",
+  "title": "Window allocation pilot on RTX 4060 Laptop at micro-batch 16",
+  "upstream_comparable": false
+}

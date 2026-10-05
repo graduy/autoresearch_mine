@@ -1,0 +1,136 @@
+{
+  "artifacts": [
+    {
+      "created_at": 1791135908.4674273,
+      "exists": true,
+      "experiment_id": "nanochat-rtx4060",
+      "id": 7,
+      "kind": "stdout",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/seed-42/stdout.log",
+      "run_id": "nanochat-rtx4060-baseline-42-4fb99395",
+      "seed": 42,
+      "sha256": "6b7519aaaa6074a1b3686eecb9d8e7d2b6f83e0591b94fae823fa3d054359fa1",
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "created_at": 1791135908.4704728,
+      "exists": true,
+      "experiment_id": "nanochat-rtx4060",
+      "id": 8,
+      "kind": "stderr",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/seed-42/stderr.log",
+      "run_id": "nanochat-rtx4060-baseline-42-4fb99395",
+      "seed": 42,
+      "sha256": "7ebdc6316942788b76b6728bef0a8e26c03f9ae3cedc3d25cfa1f6522daccc17",
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "created_at": 1791135908.4735677,
+      "exists": true,
+      "experiment_id": "nanochat-rtx4060",
+      "id": 9,
+      "kind": "integrity_receipt",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/seed-42/integrity_receipt.json",
+      "run_id": "nanochat-rtx4060-baseline-42-4fb99395",
+      "seed": 42,
+      "sha256": "389daff181721d71f181f7a1b7fa0b7a08663b558ceaa75e1a167771a2ef04cc",
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "created_at": 1791138848.814298,
+      "exists": true,
+      "experiment_id": "nanochat-rtx4060",
+      "id": 10,
+      "kind": "stdout",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/nanochat-rtx4060-baseline-42-e2d8ee34/stdout.log",
+      "run_id": "nanochat-rtx4060-baseline-42-e2d8ee34",
+      "seed": 42,
+      "sha256": "418da4d0c77511cc320f0d33c129ccc62f3b3ba6034819183b3f6b5e105b1257",
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "created_at": 1791138848.8180227,
+      "exists": true,
+      "experiment_id": "nanochat-rtx4060",
+      "id": 11,
+      "kind": "stderr",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/nanochat-rtx4060-baseline-42-e2d8ee34/stderr.log",
+      "run_id": "nanochat-rtx4060-baseline-42-e2d8ee34",
+      "seed": 42,
+      "sha256": "d1e85679f8c39b217e29bb4843f44640ba47536b97dce76b7ea2bdb87a6da2cd",
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "created_at": 1791138848.821163,
+      "exists": true,
+      "experiment_id": "nanochat-rtx4060",
+      "id": 12,
+      "kind": "integrity_receipt",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/nanochat-rtx4060-baseline-42-e2d8ee34/integrity_receipt.json",
+      "run_id": "nanochat-rtx4060-baseline-42-e2d8ee34",
+      "seed": 42,
+      "sha256": "a56169844046c89e33831651da3bcef9858e9cc4b97e00245486796576c7e553",
+      "stage": "baseline",
+      "status": "crash"
+    }
+  ],
+  "claim_boundary": {
+    "independent_test": "TBD",
+    "missing_evidence": [
+      "multi_seed",
+      "independent_test",
+      "checkpoint"
+    ],
+    "multi_seed": "stability evidence only",
+    "paper_ready": false,
+    "selection_holdout": "pilot results select candidates; they do not establish a final claim"
+  },
+  "experiment_id": "nanochat-rtx4060",
+  "generated_by": "autoresearch-lab evidence layer",
+  "protocol": {
+    "base_commit": "recorded_at_run_time",
+    "dataset_manifest_hash": "recorded_at_run_time",
+    "evaluation_script": "prepare.py:evaluate_bpb",
+    "metric_direction": "minimize",
+    "primary_metric": "val_bpb",
+    "upstream_comparable": false
+  },
+  "runs": [
+    {
+      "branch": "autoresearch/lab-20261005",
+      "code_commit": "c4e9a3ff6d4d791d8387f20120ee59f64f606ee1",
+      "metric": null,
+      "receipt_path": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/seed-42/integrity_receipt.json",
+      "receipt_sha256": "389daff181721d71f181f7a1b7fa0b7a08663b558ceaa75e1a167771a2ef04cc",
+      "run_id": "nanochat-rtx4060-baseline-42-4fb99395",
+      "seed": 42,
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "branch": "autoresearch/lab-20261005",
+      "code_commit": "91df42537081c470ded9bcf5640b3c319500b84b",
+      "metric": null,
+      "receipt_path": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/nanochat-rtx4060-baseline-42-e2d8ee34/integrity_receipt.json",
+      "receipt_sha256": "a56169844046c89e33831651da3bcef9858e9cc4b97e00245486796576c7e553",
+      "run_id": "nanochat-rtx4060-baseline-42-e2d8ee34",
+      "seed": 42,
+      "stage": "baseline",
+      "status": "crash"
+    }
+  ],
+  "schema_version": 1,
+  "source_papers": [
+    {
+      "role": "hardware adaptation guidance",
+      "title": "autoresearch README small-compute guidance",
+      "url": "https://github.com/karpathy/autoresearch#platform-support"
+    }
+  ],
+  "title": "Hardware-adapted nanochat autoresearch on RTX 4060 Laptop"
+}

@@ -1,0 +1,57 @@
+{
+  "claim_gate": {
+    "independent_test": "TBD",
+    "interpretation": "TBD: evidence is exploratory or incomplete",
+    "paper_claim_ready": false,
+    "requirements": {
+      "independent_test": false,
+      "locked_code_commit": false,
+      "multi_seed": false,
+      "statistics": false
+    }
+  },
+  "comparisons": [],
+  "experiment_id": "nanochat-rtx4060",
+  "metric_direction": "minimize",
+  "multi_seed": {
+    "runs": [],
+    "statistics": {
+      "bootstrap_mean_ci95": null,
+      "boundary": "TBD: no valid metric",
+      "max": null,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "n": 0,
+      "std": null
+    }
+  },
+  "primary_metric": "val_bpb",
+  "protocol_boundary": "hardware-adapted/local protocol",
+  "reference": {
+    "metric": null,
+    "run_id": null,
+    "source": "TBD"
+  },
+  "runs": [
+    {
+      "metric": null,
+      "peak_vram_mb": null,
+      "run_id": "nanochat-rtx4060-baseline-42-4fb99395",
+      "runtime_seconds": 21.359150133001094,
+      "seed": 42,
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "metric": null,
+      "peak_vram_mb": null,
+      "run_id": "nanochat-rtx4060-baseline-42-e2d8ee34",
+      "runtime_seconds": 11.64079119499911,
+      "seed": 42,
+      "stage": "baseline",
+      "status": "crash"
+    }
+  ],
+  "title": "Hardware-adapted nanochat autoresearch on RTX 4060 Laptop"
+}

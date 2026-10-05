@@ -1,0 +1,20 @@
+{
+  "analysis": "/home/grady/agent/autoresearch-lab/deliverables/nanochat-window-slll-b16/analysis.json",
+  "boss_update": "/home/grady/agent/autoresearch-lab/deliverables/nanochat-window-slll-b16/boss_update.md",
+  "claim_boundary": {
+    "independent_test": "TBD",
+    "missing_evidence": [
+      "multi_seed",
+      "independent_test",
+      "checkpoint"
+    ],
+    "multi_seed": "stability evidence only",
+    "paper_ready": false,
+    "selection_holdout": "pilot results select candidates; they do not establish a final claim"
+  },
+  "evidence_manifest": "/home/grady/agent/autoresearch-lab/deliverables/nanochat-window-slll-b16/evidence_manifest.json",
+  "experiment_id": "nanochat-window-slll-b16",
+  "package_root": "/home/grady/agent/autoresearch-lab/deliverables/nanochat-window-slll-b16",
+  "paper_input": "/home/grady/agent/autoresearch-lab/deliverables/nanochat-window-slll-b16/paper_input.md",
+  "ppt_brief": "/home/grady/agent/autoresearch-lab/deliverables/nanochat-window-slll-b16/ppt_brief.md"
+}

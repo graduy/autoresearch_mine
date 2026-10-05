@@ -1,0 +1,56 @@
+{
+  "after": {
+    "allowed_change_paths": [
+      "train.py"
+    ],
+    "branch": "autoresearch/lab-20261005",
+    "code_root": "/home/grady/.codex/local-repos/autoresearch",
+    "head": "228791fb499afffb54b46200aca536f79142f117",
+    "protected_hashes": {
+      "prepare.py": "4f2ba9cbb8ba8c4a3d35be405a913e2f3be3af9aea103ed52ef7b2a662058150",
+      "pyproject.toml": "675c150a9e0769f0e39a43eb7d836934266fa348d6e2403521f1ff99f9b9f1af",
+      "uv.lock": "03174c5cce6387418c5b6cc9bbe8f71ad0ae1e1d6fedeaecae5cdcf7321da0a3"
+    },
+    "status_porcelain": ""
+  },
+  "before": {
+    "allowed_change_paths": [
+      "train.py"
+    ],
+    "branch": "autoresearch/lab-20261005",
+    "code_root": "/home/grady/.codex/local-repos/autoresearch",
+    "head": "228791fb499afffb54b46200aca536f79142f117",
+    "protected_hashes": {
+      "prepare.py": "4f2ba9cbb8ba8c4a3d35be405a913e2f3be3af9aea103ed52ef7b2a662058150",
+      "pyproject.toml": "675c150a9e0769f0e39a43eb7d836934266fa348d6e2403521f1ff99f9b9f1af",
+      "uv.lock": "03174c5cce6387418c5b6cc9bbe8f71ad0ae1e1d6fedeaecae5cdcf7321da0a3"
+    },
+    "status_porcelain": ""
+  },
+  "command": [
+    "uv",
+    "run",
+    "train.py"
+  ],
+  "exit_code": 1,
+  "experiment_id": "nanochat-local",
+  "metric": null,
+  "peak_vram_mb": null,
+  "run_id": "nanochat-local-baseline-42-4c283daa",
+  "runtime_seconds": 85.47077888199965,
+  "scope_check": {
+    "after_head": "228791fb499afffb54b46200aca536f79142f117",
+    "before_head": "228791fb499afffb54b46200aca536f79142f117",
+    "changed_paths": [],
+    "passed": true,
+    "protected_changed": [],
+    "scope_violations": []
+  },
+  "seed": 42,
+  "stage": "baseline",
+  "status": "crash",
+  "unset_environment": [
+    "ALL_PROXY",
+    "all_proxy"
+  ]
+}

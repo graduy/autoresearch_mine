@@ -1,0 +1,86 @@
+{
+  "artifacts": [
+    {
+      "created_at": 1791140356.1989594,
+      "exists": true,
+      "experiment_id": "nanochat-window-slll-b16",
+      "id": 19,
+      "kind": "stdout",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-window-slll-b16/pilot/nanochat-window-slll-b16-pilot-42-c8a96451/stdout.log",
+      "run_id": "nanochat-window-slll-b16-pilot-42-c8a96451",
+      "seed": 42,
+      "sha256": "2d11e4151e73779f8587cf39fbfccb66fa8b08bac62edddd2fdd6fcf5774720b",
+      "stage": "pilot",
+      "status": "discard"
+    },
+    {
+      "created_at": 1791140356.2020118,
+      "exists": true,
+      "experiment_id": "nanochat-window-slll-b16",
+      "id": 20,
+      "kind": "stderr",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-window-slll-b16/pilot/nanochat-window-slll-b16-pilot-42-c8a96451/stderr.log",
+      "run_id": "nanochat-window-slll-b16-pilot-42-c8a96451",
+      "seed": 42,
+      "sha256": "af58f2653adcbacc171c53a8bfa7aa4339d49afcf2925dff4667c38caa71686e",
+      "stage": "pilot",
+      "status": "discard"
+    },
+    {
+      "created_at": 1791140356.204947,
+      "exists": true,
+      "experiment_id": "nanochat-window-slll-b16",
+      "id": 21,
+      "kind": "integrity_receipt",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-window-slll-b16/pilot/nanochat-window-slll-b16-pilot-42-c8a96451/integrity_receipt.json",
+      "run_id": "nanochat-window-slll-b16-pilot-42-c8a96451",
+      "seed": 42,
+      "sha256": "542ec93bdb394367fc5f76b3596b4c822ff2a9364aeebd5939835413300af97e",
+      "stage": "pilot",
+      "status": "discard"
+    }
+  ],
+  "claim_boundary": {
+    "independent_test": "TBD",
+    "missing_evidence": [
+      "multi_seed",
+      "independent_test",
+      "checkpoint"
+    ],
+    "multi_seed": "stability evidence only",
+    "paper_ready": false,
+    "selection_holdout": "pilot results select candidates; they do not establish a final claim"
+  },
+  "experiment_id": "nanochat-window-slll-b16",
+  "generated_by": "autoresearch-lab evidence layer",
+  "protocol": {
+    "base_commit": "78c13da",
+    "dataset_manifest_hash": "same_as_nanochat-rtx4060-b16",
+    "evaluation_script": "prepare.py:evaluate_bpb",
+    "metric_direction": "minimize",
+    "primary_metric": "val_bpb",
+    "upstream_comparable": false
+  },
+  "runs": [
+    {
+      "branch": "autoresearch/lab-20261005",
+      "code_commit": "5abce5ea408306f21654e5557d57b052cf2a168e",
+      "metric": 1.715169,
+      "receipt_path": "/home/grady/agent/autoresearch-lab/runs/nanochat-window-slll-b16/pilot/nanochat-window-slll-b16-pilot-42-c8a96451/integrity_receipt.json",
+      "receipt_sha256": "542ec93bdb394367fc5f76b3596b4c822ff2a9364aeebd5939835413300af97e",
+      "run_id": "nanochat-window-slll-b16-pilot-42-c8a96451",
+      "seed": 42,
+      "stage": "pilot",
+      "status": "discard"
+    }
+  ],
+  "schema_version": 1,
+  "source_papers": [
+    {
+      "role": "small-compute protocol boundary",
+      "title": "autoresearch README small-compute guidance",
+      "url": "https://github.com/karpathy/autoresearch#platform-support"
+    }
+  ],
+  "title": "Window allocation pilot on RTX 4060 Laptop at micro-batch 16"
+}

@@ -1,0 +1,28 @@
+{
+  "project_id": "nanochat-local",
+  "code_root": "/home/grady/.codex/local-repos/autoresearch",
+  "ledger_path": "artifacts/ledger.sqlite3",
+  "artifact_root": "artifacts",
+  "primary_metric": "val_bpb",
+  "metric_direction": "minimize",
+  "gpu_hour_usd": 0.0,
+  "unset_environment": ["ALL_PROXY", "all_proxy"],
+  "require_gpu_exclusive": true,
+  "max_foreign_gpu_mb": 512,
+  "require_clean_worktree": true,
+  "required_branch_prefix": "autoresearch/",
+  "auto_rollback": true,
+  "protected_paths": [
+    "prepare.py",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "allowed_change_paths": ["train.py"],
+  "upstream_comparable": true,
+  "protocol": {
+    "time_budget_seconds": 300,
+    "sequence_length": 2048,
+    "evaluation": "prepare.py:evaluate_bpb",
+    "metric_source": "stdout"
+  }
+}

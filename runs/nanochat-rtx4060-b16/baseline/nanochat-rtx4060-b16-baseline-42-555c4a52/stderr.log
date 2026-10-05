@@ -1,0 +1,1 @@
+W1005 02:39:20.059000 197096 .venv/lib/python3.10/site-packages/torch/_inductor/utils.py:1613] [2/0] Not enough SMs to use max_autotune_gemm mode

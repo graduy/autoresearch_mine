@@ -1,0 +1,80 @@
+{
+  "events": [
+    {
+      "created_at": 1791135880.8060546,
+      "event": "approval",
+      "experiment_id": "nanochat-rtx4060",
+      "id": 6,
+      "payload_json": "{\"decision\": \"approve\", \"source\": \"user_request\", \"actor\": \"codex\"}",
+      "run_id": null
+    },
+    {
+      "created_at": 1791135887.0842917,
+      "event": "run_started",
+      "experiment_id": "nanochat-rtx4060",
+      "id": 7,
+      "payload_json": "{\"run_id\": \"nanochat-rtx4060-baseline-42-4fb99395\", \"experiment_id\": \"nanochat-rtx4060\", \"stage\": \"baseline\", \"seed\": 42, \"command\": [\"uv\", \"run\", \"train.py\"], \"run_dir\": \"/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/seed-42\"}",
+      "run_id": "nanochat-rtx4060-baseline-42-4fb99395"
+    },
+    {
+      "created_at": 1791135908.4593294,
+      "event": "run_finished",
+      "experiment_id": "nanochat-rtx4060",
+      "id": 8,
+      "payload_json": "{\"status\": \"crash\", \"exit_code\": 1, \"metric\": null, \"peak_vram_mb\": null, \"runtime_seconds\": 21.359150133001094, \"cost_usd\": 0.0, \"receipt_path\": \"/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/seed-42/integrity_receipt.json\"}",
+      "run_id": "nanochat-rtx4060-baseline-42-4fb99395"
+    },
+    {
+      "created_at": 1791138837.1456678,
+      "event": "run_started",
+      "experiment_id": "nanochat-rtx4060",
+      "id": 10,
+      "payload_json": "{\"run_id\": \"nanochat-rtx4060-baseline-42-e2d8ee34\", \"experiment_id\": \"nanochat-rtx4060\", \"stage\": \"baseline\", \"seed\": 42, \"command\": [\"uv\", \"run\", \"train.py\"], \"run_dir\": \"/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/nanochat-rtx4060-baseline-42-e2d8ee34\"}",
+      "run_id": "nanochat-rtx4060-baseline-42-e2d8ee34"
+    },
+    {
+      "created_at": 1791138848.80091,
+      "event": "run_finished",
+      "experiment_id": "nanochat-rtx4060",
+      "id": 11,
+      "payload_json": "{\"status\": \"crash\", \"exit_code\": 1, \"metric\": null, \"peak_vram_mb\": null, \"runtime_seconds\": 11.64079119499911, \"cost_usd\": 0.0, \"receipt_path\": \"/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/nanochat-rtx4060-baseline-42-e2d8ee34/integrity_receipt.json\"}",
+      "run_id": "nanochat-rtx4060-baseline-42-e2d8ee34"
+    }
+  ],
+  "runs": [
+    {
+      "command_json": "[\"uv\", \"run\", \"train.py\"]",
+      "cost_usd": 0.0,
+      "created_at": 1791135887.0841467,
+      "exit_code": 1,
+      "experiment_id": "nanochat-rtx4060",
+      "finished_at": 1791135908.4589705,
+      "metric": null,
+      "peak_vram_mb": null,
+      "receipt_path": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/seed-42/integrity_receipt.json",
+      "run_dir": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/seed-42",
+      "run_id": "nanochat-rtx4060-baseline-42-4fb99395",
+      "runtime_seconds": 21.359150133001094,
+      "seed": 42,
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "command_json": "[\"uv\", \"run\", \"train.py\"]",
+      "cost_usd": 0.0,
+      "created_at": 1791138837.1455135,
+      "exit_code": 1,
+      "experiment_id": "nanochat-rtx4060",
+      "finished_at": 1791138848.800525,
+      "metric": null,
+      "peak_vram_mb": null,
+      "receipt_path": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/nanochat-rtx4060-baseline-42-e2d8ee34/integrity_receipt.json",
+      "run_dir": "/home/grady/agent/autoresearch-lab/runs/nanochat-rtx4060/baseline/nanochat-rtx4060-baseline-42-e2d8ee34",
+      "run_id": "nanochat-rtx4060-baseline-42-e2d8ee34",
+      "runtime_seconds": 11.64079119499911,
+      "seed": 42,
+      "stage": "baseline",
+      "status": "crash"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "claim_gate": {
+    "independent_test": "TBD",
+    "interpretation": "TBD: evidence is exploratory or incomplete",
+    "paper_claim_ready": false,
+    "requirements": {
+      "independent_test": false,
+      "locked_code_commit": false,
+      "multi_seed": false,
+      "statistics": false
+    }
+  },
+  "comparisons": [
+    {
+      "delta": 0.017137999999999876,
+      "improves": false,
+      "metric": 1.715169,
+      "reference_metric": 1.698031,
+      "run_id": "nanochat-window-slll-b16-pilot-42-c8a96451",
+      "seed": 42,
+      "stage": "pilot",
+      "status": "discard"
+    }
+  ],
+  "experiment_id": "nanochat-window-slll-b16",
+  "metric_direction": "minimize",
+  "multi_seed": {
+    "runs": [],
+    "statistics": {
+      "bootstrap_mean_ci95": null,
+      "boundary": "TBD: no valid metric",
+      "max": null,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "n": 0,
+      "std": null
+    }
+  },
+  "primary_metric": "val_bpb",
+  "protocol_boundary": "hardware-adapted/local protocol",
+  "reference": {
+    "metric": 1.698031,
+    "run_id": null,
+    "source": "experiment card reference_metric"
+  },
+  "runs": [
+    {
+      "metric": 1.715169,
+      "peak_vram_mb": 6150.2,
+      "run_id": "nanochat-window-slll-b16-pilot-42-c8a96451",
+      "runtime_seconds": 575.8238819889993,
+      "seed": 42,
+      "stage": "pilot",
+      "status": "discard"
+    }
+  ],
+  "title": "Window allocation pilot on RTX 4060 Laptop at micro-batch 16"
+}

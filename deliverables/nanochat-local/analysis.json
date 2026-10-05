@@ -1,0 +1,57 @@
+{
+  "claim_gate": {
+    "independent_test": "TBD",
+    "interpretation": "TBD: evidence is exploratory or incomplete",
+    "paper_claim_ready": false,
+    "requirements": {
+      "independent_test": false,
+      "locked_code_commit": false,
+      "multi_seed": false,
+      "statistics": false
+    }
+  },
+  "comparisons": [],
+  "experiment_id": "nanochat-local",
+  "metric_direction": "minimize",
+  "multi_seed": {
+    "runs": [],
+    "statistics": {
+      "bootstrap_mean_ci95": null,
+      "boundary": "TBD: no valid metric",
+      "max": null,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "n": 0,
+      "std": null
+    }
+  },
+  "primary_metric": "val_bpb",
+  "protocol_boundary": "hardware-adapted/local protocol",
+  "reference": {
+    "metric": null,
+    "run_id": null,
+    "source": "TBD"
+  },
+  "runs": [
+    {
+      "metric": null,
+      "peak_vram_mb": null,
+      "run_id": "nanochat-local-baseline-42-9653fd41",
+      "runtime_seconds": 2.5185208279999642,
+      "seed": 42,
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "metric": null,
+      "peak_vram_mb": null,
+      "run_id": "nanochat-local-baseline-42-4c283daa",
+      "runtime_seconds": 85.47077888199965,
+      "seed": 42,
+      "stage": "baseline",
+      "status": "crash"
+    }
+  ],
+  "title": "Pinned nanochat autoresearch adapter on local RTX 4060"
+}

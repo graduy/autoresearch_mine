@@ -1,0 +1,26 @@
+{
+  "before": {
+    "allowed_change_paths": [
+      "train.py"
+    ],
+    "branch": "autoresearch/lab-20261005",
+    "code_root": "/home/grady/.codex/local-repos/autoresearch",
+    "head": "c4e9a3ff6d4d791d8387f20120ee59f64f606ee1",
+    "protected_hashes": {
+      "prepare.py": "4f2ba9cbb8ba8c4a3d35be405a913e2f3be3af9aea103ed52ef7b2a662058150",
+      "pyproject.toml": "675c150a9e0769f0e39a43eb7d836934266fa348d6e2403521f1ff99f9b9f1af",
+      "uv.lock": "03174c5cce6387418c5b6cc9bbe8f71ad0ae1e1d6fedeaecae5cdcf7321da0a3"
+    },
+    "status_porcelain": ""
+  },
+  "code_root": "/home/grady/.codex/local-repos/autoresearch",
+  "command": [
+    "uv",
+    "run",
+    "train.py"
+  ],
+  "experiment_id": "nanochat-rtx4060",
+  "run_id": "nanochat-rtx4060-baseline-42-4fb99395",
+  "seed": 42,
+  "stage": "baseline"
+}

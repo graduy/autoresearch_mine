@@ -1,0 +1,136 @@
+{
+  "artifacts": [
+    {
+      "created_at": 1791135636.036994,
+      "exists": true,
+      "experiment_id": "nanochat-local",
+      "id": 1,
+      "kind": "stdout",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-local/baseline/seed-42/stdout.log",
+      "run_id": "nanochat-local-baseline-42-9653fd41",
+      "seed": 42,
+      "sha256": "3b524e4f47e7cde257b6ba319ada7025ea895f0f1c660c3da25b0deb5b36686d",
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "created_at": 1791135636.0393791,
+      "exists": true,
+      "experiment_id": "nanochat-local",
+      "id": 2,
+      "kind": "stderr",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-local/baseline/seed-42/stderr.log",
+      "run_id": "nanochat-local-baseline-42-9653fd41",
+      "seed": 42,
+      "sha256": "1b708b1e9a2512da6441de788481ffc48e650a113899f9c9fcd5254260676fab",
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "created_at": 1791135636.0424032,
+      "exists": true,
+      "experiment_id": "nanochat-local",
+      "id": 3,
+      "kind": "integrity_receipt",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-local/baseline/seed-42/integrity_receipt.json",
+      "run_id": "nanochat-local-baseline-42-9653fd41",
+      "seed": 42,
+      "sha256": "6f331d91cf3ad7a6497c94e68a48f9db41bf522e2f27d54bea56563c35cc47cb",
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "created_at": 1791135790.0450692,
+      "exists": true,
+      "experiment_id": "nanochat-local",
+      "id": 4,
+      "kind": "stdout",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-local/baseline/seed-42/stdout.log",
+      "run_id": "nanochat-local-baseline-42-4c283daa",
+      "seed": 42,
+      "sha256": "3b524e4f47e7cde257b6ba319ada7025ea895f0f1c660c3da25b0deb5b36686d",
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "created_at": 1791135790.0481918,
+      "exists": true,
+      "experiment_id": "nanochat-local",
+      "id": 5,
+      "kind": "stderr",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-local/baseline/seed-42/stderr.log",
+      "run_id": "nanochat-local-baseline-42-4c283daa",
+      "seed": 42,
+      "sha256": "1b708b1e9a2512da6441de788481ffc48e650a113899f9c9fcd5254260676fab",
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "created_at": 1791135790.051028,
+      "exists": true,
+      "experiment_id": "nanochat-local",
+      "id": 6,
+      "kind": "integrity_receipt",
+      "path": "/home/grady/agent/autoresearch-lab/runs/nanochat-local/baseline/seed-42/integrity_receipt.json",
+      "run_id": "nanochat-local-baseline-42-4c283daa",
+      "seed": 42,
+      "sha256": "6f331d91cf3ad7a6497c94e68a48f9db41bf522e2f27d54bea56563c35cc47cb",
+      "stage": "baseline",
+      "status": "crash"
+    }
+  ],
+  "claim_boundary": {
+    "independent_test": "TBD",
+    "missing_evidence": [
+      "multi_seed",
+      "independent_test",
+      "checkpoint"
+    ],
+    "multi_seed": "stability evidence only",
+    "paper_ready": false,
+    "selection_holdout": "pilot results select candidates; they do not establish a final claim"
+  },
+  "experiment_id": "nanochat-local",
+  "generated_by": "autoresearch-lab evidence layer",
+  "protocol": {
+    "base_commit": "228791fb499afffb54b46200aca536f79142f117",
+    "dataset_manifest_hash": "recorded_at_run_time",
+    "evaluation_script": "prepare.py:evaluate_bpb",
+    "metric_direction": "minimize",
+    "primary_metric": "val_bpb",
+    "upstream_comparable": "TBD"
+  },
+  "runs": [
+    {
+      "branch": "autoresearch/lab-20261005",
+      "code_commit": "228791fb499afffb54b46200aca536f79142f117",
+      "metric": null,
+      "receipt_path": "/home/grady/agent/autoresearch-lab/runs/nanochat-local/baseline/seed-42/integrity_receipt.json",
+      "receipt_sha256": "6f331d91cf3ad7a6497c94e68a48f9db41bf522e2f27d54bea56563c35cc47cb",
+      "run_id": "nanochat-local-baseline-42-9653fd41",
+      "seed": 42,
+      "stage": "baseline",
+      "status": "crash"
+    },
+    {
+      "branch": "autoresearch/lab-20261005",
+      "code_commit": "228791fb499afffb54b46200aca536f79142f117",
+      "metric": null,
+      "receipt_path": "/home/grady/agent/autoresearch-lab/runs/nanochat-local/baseline/seed-42/integrity_receipt.json",
+      "receipt_sha256": "6f331d91cf3ad7a6497c94e68a48f9db41bf522e2f27d54bea56563c35cc47cb",
+      "run_id": "nanochat-local-baseline-42-4c283daa",
+      "seed": 42,
+      "stage": "baseline",
+      "status": "crash"
+    }
+  ],
+  "schema_version": 1,
+  "source_papers": [
+    {
+      "role": "evaluation protocol and fixed val_bpb loop",
+      "title": "autoresearch",
+      "url": "https://github.com/karpathy/autoresearch"
+    }
+  ],
+  "title": "Pinned nanochat autoresearch adapter on local RTX 4060"
+}

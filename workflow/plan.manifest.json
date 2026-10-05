@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "name": "autoresearch-local-evidence-loop",
+  "control_plane": "workflow/gate.py",
+  "authoritative_ledger": "artifacts/ledger.sqlite3",
+  "stages": [
+    "literature_scan",
+    "relevance_screen",
+    "experiment_card",
+    "human_approval",
+    "provision_server",
+    "baseline",
+    "code_patch",
+    "pilot",
+    "full",
+    "multi_seed",
+    "analysis",
+    "report_draft",
+    "archive",
+    "cleanup"
+  ],
+  "hard_boundaries": [
+    "human approval is required before execution or server creation",
+    "prepare.py, data, evaluator, and dependencies are protected",
+    "literature and predicted gains are hypotheses, not measured results",
+    "multi_seed records stability and does not require every seed to beat the best seed",
+    "missing evidence is recorded as TBD"
+  ]
+}

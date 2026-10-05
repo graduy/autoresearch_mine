@@ -1,0 +1,55 @@
+{
+  "experiment_id": "nanochat-rtx4060",
+  "title": "Hardware-adapted nanochat autoresearch on RTX 4060 Laptop",
+  "hypothesis": "Reducing only the per-device micro-batch should make the fixed evaluation chain executable within 8 GB VRAM while preserving the 5-minute optimization budget.",
+  "source_papers": [
+    {
+      "title": "autoresearch README small-compute guidance",
+      "url": "https://github.com/karpathy/autoresearch#platform-support",
+      "role": "hardware adaptation guidance"
+    }
+  ],
+  "base_commit": "recorded_at_run_time",
+  "protocol_changes": ["DEVICE_BATCH_SIZE 128 -> 32"],
+  "upstream_comparable": false,
+  "dataset_manifest_hash": "recorded_at_run_time",
+  "evaluation_script": "prepare.py:evaluate_bpb",
+  "primary_metric": "val_bpb",
+  "metric_direction": "minimize",
+  "secondary_metrics": ["training_seconds", "peak_vram_mb", "num_steps"],
+  "constraints": {
+    "max_runtime_seconds": 660,
+    "max_cost_usd": 0.0,
+    "max_vram_gb": 7.7,
+    "max_runs": 8
+  },
+  "stages": {
+    "baseline": {
+      "command": ["uv", "run", "train.py"],
+      "metric_pattern": "^val_bpb:\\s*([0-9.]+)",
+      "vram_pattern": "^peak_vram_mb:\\s*([0-9.]+)"
+    },
+    "pilot": {
+      "command": ["uv", "run", "train.py"],
+      "metric_pattern": "^val_bpb:\\s*([0-9.]+)",
+      "vram_pattern": "^peak_vram_mb:\\s*([0-9.]+)"
+    },
+    "full": {
+      "command": ["uv", "run", "train.py"],
+      "metric_pattern": "^val_bpb:\\s*([0-9.]+)",
+      "vram_pattern": "^peak_vram_mb:\\s*([0-9.]+)"
+    },
+    "multi_seed": {
+      "command": ["uv", "run", "train.py"],
+      "metric_pattern": "^val_bpb:\\s*([0-9.]+)",
+      "vram_pattern": "^peak_vram_mb:\\s*([0-9.]+)"
+    }
+  },
+  "seeds": [17, 42, 3407],
+  "acceptance_rule": "keep only if val_bpb improves over the adapted baseline without violating the VRAM or runtime budget",
+  "stop_rule": "stop after four local runs, an integrity failure, or the configured budget",
+  "human_approval": {
+    "required": true,
+    "status": "pending"
+  }
+}

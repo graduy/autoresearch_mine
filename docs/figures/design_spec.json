@@ -1,0 +1,33 @@
+{
+  "figure_claim": "A budget-aware autoresearch system converts literature evidence into approved, reproducible experiments and only promotes independently verified evidence into a paper draft.",
+  "audience": "researchers reviewing the system before approving an experiment",
+  "reading_order": ["evidence", "decision", "execution", "ledger", "paper", "feedback"],
+  "canvas": {"width": 1800, "height": 1050, "aspect_ratio": "12:7"},
+  "visual_grammar": {
+    "primary_spine": "left-to-right research loop",
+    "focal_zone": "integrity-gated experiment runner",
+    "process_connector": "solid arrow",
+    "feedback_connector": "dashed arrow",
+    "evidence_connector": "dotted arrow",
+    "palette": {"evidence": "#E8F1FB", "decision": "#FFF3D6", "execution": "#E8F5E9", "ledger": "#F1E8FA", "paper": "#FDEBEC", "ink": "#1F2937"},
+    "forbidden_motifs": ["fabricated metric charts", "unlabeled SOTA claims", "unverified arrows implying causality"]
+  },
+  "node_ledger": [
+    {"id": "literature", "label": "Literature evidence\n(arXiv / official pages)"},
+    {"id": "card", "label": "Experiment card\nhypothesis + budget + metric"},
+    {"id": "approval", "label": "Human approval\nhard gate"},
+    {"id": "preflight", "label": "Preflight\nGPU + code scope + data hash"},
+    {"id": "funnel", "label": "Run funnel\nbaseline → pilot → full → seeds"},
+    {"id": "integrity", "label": "Integrity receipt\nmetric + protected files"},
+    {"id": "ledger", "label": "SQLite ledger + artifacts\nlogs / checkpoints / cost"},
+    {"id": "report", "label": "Evidence-bound report\nTBD when evidence is missing"},
+    {"id": "memory", "label": "Reviewed memory\nnext hypothesis"}
+  ],
+  "edges": [
+    ["literature", "card", "solid"], ["card", "approval", "solid"], ["approval", "preflight", "solid"],
+    ["preflight", "funnel", "solid"], ["funnel", "integrity", "solid"], ["integrity", "ledger", "solid"],
+    ["ledger", "report", "solid"], ["report", "memory", "dashed"], ["memory", "card", "dashed"],
+    ["ledger", "funnel", "dotted"]
+  ]
+}
+

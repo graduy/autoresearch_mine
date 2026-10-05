@@ -1,0 +1,15 @@
+{
+  "figure_claim": "A paired single-seed pilot recorded a higher val_bpb for SLLL than the locked SSSL reference under the batch-16 RTX 4060 protocol.",
+  "source_runs": [
+    "nanochat-rtx4060-b16-baseline-42-555c4a52",
+    "nanochat-window-slll-b16-pilot-42-c8a96451"
+  ],
+  "metric": "val_bpb",
+  "direction": "minimize",
+  "values": {
+    "SSSL_baseline": 1.698031,
+    "SLLL_pilot": 1.715169
+  },
+  "boundary": "single seed; exploratory paired pilot; no multi-seed or independent-test inference",
+  "files": ["figures/pilot-result.svg", "figures/pilot-result.png"]
+}
