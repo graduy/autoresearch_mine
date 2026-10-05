@@ -162,10 +162,10 @@ def run_stage(root: str | Path, experiment_id: str, stage: str, seed: int | None
             best = _reference_metric(ledger, card, seed)
         if stage != "baseline" and best is None and card.get("reference_metric") is not None:
             best = float(card["reference_metric"])
-        if stage == "multi_seed":
+        if stage == "multi_seed" or (stage == "full" and card.get("full_seeds")):
             # Multi-seed is stability evidence. A seed is valid when it
-            # completes under the locked protocol; it need not beat the best
-            # seed, which would confuse variance with candidate selection.
+            # completes under the locked protocol; paired full seeds follow
+            # the same rule and are judged by their aggregate afterward.
             status = "keep"
         elif stage != "baseline" and best is not None:
             improves = metric < best if card["metric_direction"] == "minimize" else metric > best
