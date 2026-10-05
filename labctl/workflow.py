@@ -28,6 +28,11 @@ def _kept(runs: list[dict[str, Any]], stage: str) -> list[dict[str, Any]]:
     return [run for run in _runs_by_stage(runs, stage) if run.get("status") == "keep" and run.get("metric") is not None]
 
 
+def _completed(runs: list[dict[str, Any]], stage: str) -> list[dict[str, Any]]:
+    return [run for run in _runs_by_stage(runs, stage)
+            if run.get("status") in {"keep", "candidate", "discard"} and run.get("metric") is not None]
+
+
 def _failed_only(runs: list[dict[str, Any]], stage: str) -> bool:
     stage_runs = _runs_by_stage(runs, stage)
     return bool(stage_runs) and not _kept(runs, stage) and all(
@@ -120,7 +125,7 @@ def state(root: str | Path, experiment_id: str) -> dict[str, Any]:
         else:
             declared = []
         if declared:
-            completed_seeds = {run.get("seed") for run in kept}
+            completed_seeds = {run.get("seed") for run in _completed(runs, stage)}
             if declared and all(seed in completed_seeds for seed in declared):
                 continue
         elif kept:
@@ -131,7 +136,9 @@ def state(root: str | Path, experiment_id: str) -> dict[str, Any]:
             return {**base, "state": "blocked", "next_stage": stage,
                     "next_action": "resolve the stage dependency",
                     "blockers": [reason] if reason else ["stage dependency is not satisfied"]}
-        if _candidate_rejected(runs, stage):
+        if _candidate_rejected(runs, stage) and (
+            not declared or all(seed in {run.get("seed") for run in _completed(runs, stage)} for seed in declared)
+        ) and not kept:
             return {**base, "state": "candidate_rejected", "next_stage": None,
                     "next_action": "revise the experiment card or create a new candidate before rerunning",
                     "blockers": [f"{stage} produced a discard; the same candidate is not rerun automatically"]}

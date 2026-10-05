@@ -79,7 +79,8 @@ def analyze_experiment(root: str | Path, experiment_id: str, output: str | Path 
     runs = ledger.runs(experiment_id)
     direction = card["metric_direction"]
 
-    baseline = _valid(runs, "baseline")
+    reference_runs = ledger.runs(card["reference_experiment_id"]) if card.get("reference_experiment_id") else []
+    baseline = _valid(runs, "baseline") or _valid(reference_runs, "baseline")
     baseline_by_seed = {run.get("seed"): run for run in baseline}
     reference_metric = float(card["reference_metric"]) if card.get("reference_metric") is not None else None
     if reference_metric is None and baseline:
@@ -115,9 +116,15 @@ def analyze_experiment(root: str | Path, experiment_id: str, output: str | Path 
         "protocol_boundary": "upstream-comparable" if card.get("upstream_comparable") else "hardware-adapted/local protocol",
         "reference": {
             "metric": reference_metric,
-            "source": "baseline ledger row" if baseline else ("experiment card reference_metric" if card.get("reference_metric") is not None else "TBD"),
+            "source": "referenced baseline ledger row" if reference_runs and baseline else ("baseline ledger row" if baseline else ("experiment card reference_metric" if card.get("reference_metric") is not None else "TBD")),
             "run_id": baseline[0]["run_id"] if baseline else None,
         },
+        "reference_runs": [
+            {"run_id": run["run_id"], "stage": run["stage"], "seed": run.get("seed"),
+             "status": run["status"], "metric": run.get("metric"),
+             "runtime_seconds": run.get("runtime_seconds"), "peak_vram_mb": run.get("peak_vram_mb")}
+            for run in reference_runs
+        ],
         "runs": [
             {"run_id": run["run_id"], "stage": run["stage"], "seed": run.get("seed"),
              "status": run["status"], "metric": run.get("metric"),
