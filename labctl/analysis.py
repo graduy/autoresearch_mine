@@ -82,9 +82,9 @@ def analyze_experiment(root: str | Path, experiment_id: str, output: str | Path 
     reference_runs = ledger.runs(card["reference_experiment_id"]) if card.get("reference_experiment_id") else []
     baseline = _valid(runs, "baseline") or _valid(reference_runs, "baseline")
     baseline_by_seed = {run.get("seed"): run for run in baseline}
-    reference_metric = float(card["reference_metric"]) if card.get("reference_metric") is not None else None
-    if reference_metric is None and baseline:
-        reference_metric = baseline[0]["metric"]
+    reference_metric = baseline[0]["metric"] if baseline else (
+        float(card["reference_metric"]) if card.get("reference_metric") is not None else None
+    )
 
     comparisons: list[dict[str, Any]] = []
     for run in runs:
@@ -102,10 +102,11 @@ def analyze_experiment(root: str | Path, experiment_id: str, output: str | Path 
 
     multi_seed = _valid(runs, "multi_seed")
     independent_test = card.get("independent_test")
+    independent_test_ready = bool(independent_test) and independent_test not in {"TBD", "pending"}
     requirements = {
         "locked_code_commit": bool(baseline and all(run.get("receipt_path") for run in baseline)),
         "multi_seed": bool(card.get("seeds")) and {run.get("seed") for run in multi_seed} >= set(card.get("seeds", [])),
-        "independent_test": bool(independent_test),
+        "independent_test": independent_test_ready,
         "statistics": len(multi_seed) >= 2,
     }
     payload = {
