@@ -14,6 +14,10 @@ from .report import draft_report
 from .figures import write_figures
 from .runner import archive_experiment, card_path, project_config, run_stage
 from .workflow import state as workflow_state, validate_ingest
+from .storage import (
+    add_code, add_reference, audit as storage_audit, bind_card, capture_asset,
+    confirm_task, init_workspace, new_task, sync_experiment, workspace_root,
+)
 
 
 def _root() -> Path:
@@ -91,6 +95,47 @@ def build_parser() -> argparse.ArgumentParser:
     pipeline_status.add_argument("--experiment", required=True)
     package = pipeline_sub.add_parser("package")
     package.add_argument("--experiment", required=True)
+
+    storage = sub.add_parser("storage", help="manage the local forautoresearch evidence archive")
+    storage_sub = storage.add_subparsers(dest="storage_command", required=True)
+    storage_init = storage_sub.add_parser("init")
+    storage_init.add_argument("--root")
+    task = storage_sub.add_parser("task")
+    task_sub = task.add_subparsers(dest="task_command", required=True)
+    task_create = task_sub.add_parser("create")
+    task_create.add_argument("--title", required=True)
+    task_create.add_argument("--slug", required=True)
+    task_create.add_argument("--status", choices=["proposed", "historical"], default="proposed")
+    reference = storage_sub.add_parser("reference")
+    reference_sub = reference.add_subparsers(dest="reference_command", required=True)
+    reference_add = reference_sub.add_parser("add")
+    reference_add.add_argument("--task")
+    reference_add.add_argument("--metadata", required=True)
+    reference_add.add_argument("--file")
+    code = storage_sub.add_parser("code")
+    code_sub = code.add_subparsers(dest="code_command", required=True)
+    code_add = code_sub.add_parser("add")
+    code_add.add_argument("--task", required=True)
+    code_add.add_argument("--repo", required=True)
+    code_add.add_argument("--ref", required=True)
+    code_add.add_argument("--role", choices=["baseline", "variant", "reference"], required=True)
+    code_add.add_argument("--slug", required=True)
+    bind = storage_sub.add_parser("bind-card")
+    bind.add_argument("--task", required=True)
+    bind.add_argument("--card", required=True)
+    bind.add_argument("--code-id", required=True)
+    confirm = storage_sub.add_parser("confirm")
+    confirm.add_argument("--task", required=True)
+    confirm.add_argument("--evidence", required=True)
+    capture = storage_sub.add_parser("capture")
+    capture.add_argument("--task", required=True)
+    capture.add_argument("--source", required=True)
+    capture.add_argument("--category", choices=["idea", "report", "paper-zh", "paper-en", "figure-draft", "figure-approved", "figure-editable", "pptx", "legacy"], required=True)
+    capture.add_argument("--name", required=True)
+    storage_audit_command = storage_sub.add_parser("audit")
+    storage_audit_command.add_argument("--task")
+    sync = storage_sub.add_parser("sync-run")
+    sync.add_argument("--experiment", required=True)
     return parser
 
 
@@ -176,4 +221,36 @@ def main(argv: list[str] | None = None) -> int:
         if args.pipeline_command == "package":
             print(build_package(root, args.experiment))
             return 0
+    if args.command == "storage":
+        archive_root = workspace_root(root)
+        if args.storage_command == "init":
+            archive_root = workspace_root(root, args.root)
+            print(init_workspace(archive_root, root))
+            return 0
+        if args.storage_command == "task" and args.task_command == "create":
+            print(new_task(archive_root, args.title, args.slug, args.status))
+            return 0
+        if args.storage_command == "reference" and args.reference_command == "add":
+            metadata = json.loads(Path(args.metadata).read_text(encoding="utf-8"))
+            print(json.dumps(add_reference(archive_root, metadata, args.task, args.file), ensure_ascii=False, indent=2))
+            return 0
+        if args.storage_command == "code" and args.code_command == "add":
+            print(json.dumps(add_code(archive_root, args.task, args.repo, args.ref, args.role, args.slug), ensure_ascii=False, indent=2))
+            return 0
+        if args.storage_command == "bind-card":
+            print(bind_card(archive_root, root, args.task, args.card, args.code_id))
+            return 0
+        if args.storage_command == "confirm":
+            print(confirm_task(archive_root, args.task, args.evidence))
+            return 0
+        if args.storage_command == "capture":
+            print(json.dumps(capture_asset(archive_root, args.task, args.source, args.category, args.name), ensure_ascii=False, indent=2))
+            return 0
+        if args.storage_command == "audit":
+            print(json.dumps(storage_audit(archive_root, args.task), ensure_ascii=False, indent=2))
+            return 0
+        if args.storage_command == "sync-run":
+            print(sync_experiment(archive_root, root, args.experiment))
+            return 0
+        return 2
     return 2

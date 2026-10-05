@@ -15,6 +15,7 @@ from .integrity import snapshot, verify_snapshot, write_receipt
 from .io import read_json, write_json
 from .ledger import Ledger
 from .workflow import assert_stage_ready
+from .storage import execution_binding
 
 
 STAGES = ("baseline", "pilot", "full", "multi_seed")
@@ -64,7 +65,9 @@ def run_stage(root: str | Path, experiment_id: str, stage: str, seed: int | None
     if constraints.get("max_runs") is not None and len(previous_runs) >= int(constraints["max_runs"]):
         raise RuntimeError("experiment max_runs budget reached")
 
-    code_root = Path(project["code_root"]).resolve()
+    code_root, binding_errors = execution_binding(root, card)
+    if binding_errors:
+        raise RuntimeError("managed experiment binding blocked: " + "; ".join(binding_errors))
     if not code_root.is_dir():
         raise FileNotFoundError(f"code_root does not exist: {code_root}")
     spec = card["stages"][stage]
@@ -207,7 +210,9 @@ def archive_experiment(root: str | Path, experiment_id: str) -> Path:
     root = Path(root).resolve()
     project = project_config(root)
     card = load_card(card_path(root, experiment_id))
-    code_root = Path(project["code_root"]).resolve()
+    code_root, binding_errors = execution_binding(root, card)
+    if binding_errors:
+        raise RuntimeError("managed experiment binding blocked: " + "; ".join(binding_errors))
     target = root / "artifacts" / "archives" / experiment_id
     target.mkdir(parents=True, exist_ok=True)
     write_json(target / "card.json", card)

@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "root": "/home/grady/forautoresearch",
+  "timezone": "Asia/Shanghai",
+  "reference_project": "/home/grady/AAAmessages/papper/SmokeSegmentation",
+  "legacy_paper_library": "/home/grady/.codex/local-repos/autoresearch-paper-library"
+}

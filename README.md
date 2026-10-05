@@ -58,3 +58,26 @@ The integrated handoff is documented in `workflow/INTEGRATED_PIPELINE.md`.
 `pipeline package` writes an evidence manifest, statistical analysis, manuscript
 input, PPT brief, and boss update under `deliverables/<experiment_id>/`. These
 are generated from the same ledger and preserve `TBD` for missing evidence.
+
+## forautoresearch archive
+
+The separate local archive at `/home/grady/forautoresearch` keeps literature,
+innovation proposals, per-task code snapshots, runs, results, papers, figures,
+and presentations under one auditable task ID. It is intentionally separate
+from the upstream code checkout and from any synced ChatGPT project files.
+
+```bash
+PYTHONPATH=. python3 -m labctl storage init
+PYTHONPATH=. python3 -m labctl storage task create \
+  --title "Autoresearch innovation" --slug autoresearch-innovation
+PYTHONPATH=. python3 -m labctl storage audit
+```
+
+New tasks start as `proposed`. A task must contain registered references, a
+reviewed compute budget, a bound experiment card, and a direct user approval
+record before the managed runner can execute it. `storage code add` records an
+independent checkout and commit snapshot; it refuses weights, datasets,
+credentials, and unsafe symlinks. Use `storage sync-run` after an approved run
+to copy logs and receipts into the task archive without overwriting earlier
+evidence. The detailed layout and naming rules are in
+`docs/STORAGE_ARCHITECTURE.md` and the archive's `NAMING_RULES.md`.
