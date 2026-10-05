@@ -44,6 +44,21 @@ def _cost(seconds: float, project: dict[str, Any]) -> float:
     return seconds / 3600.0 * float(project.get("gpu_hour_usd") or 0.0)
 
 
+def _reference_metric(ledger: Ledger, card: dict[str, Any], seed: int | None) -> float | None:
+    """Prefer a completed same-seed managed baseline over a historical value."""
+    reference_id = card.get("reference_experiment_id")
+    if not reference_id:
+        return None
+    runs = ledger.runs(reference_id)
+    matching = [run for run in runs if run.get("status") == "keep"
+                and run.get("metric") is not None and run.get("seed") == seed]
+    if matching:
+        return float(matching[-1]["metric"])
+    metrics = [float(run["metric"]) for run in runs
+               if run.get("status") == "keep" and run.get("metric") is not None]
+    return sum(metrics) / len(metrics) if metrics else None
+
+
 def run_stage(root: str | Path, experiment_id: str, stage: str, seed: int | None = None) -> dict[str, Any]:
     root = Path(root).resolve()
     project = project_config(root)
@@ -143,6 +158,8 @@ def run_stage(root: str | Path, experiment_id: str, stage: str, seed: int | None
     if exit_code == 0 and metric is not None and scope["passed"] and not budget_violation:
         status = "keep" if stage == "baseline" else "candidate"
         best = ledger.best_metric(experiment_id, card["metric_direction"])
+        if stage != "baseline" and best is None:
+            best = _reference_metric(ledger, card, seed)
         if stage != "baseline" and best is None and card.get("reference_metric") is not None:
             best = float(card["reference_metric"])
         if stage == "multi_seed":
