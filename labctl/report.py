@@ -15,6 +15,9 @@ def draft_report(root: str | Path, experiment_id: str) -> Path:
     card = load_card(card_path(root, experiment_id))
     ledger = Ledger(root / project["ledger_path"])
     runs = ledger.runs(experiment_id)
+    reference_runs = ledger.runs(card["reference_experiment_id"]) if card.get("reference_experiment_id") else []
+    fresh_baseline = [run for run in reference_runs if run.get("stage") == "baseline"
+                      and run.get("status") == "keep" and run.get("metric") is not None]
     best = ledger.best_metric(experiment_id, card["metric_direction"])
     report_path = root / "reports" / f"{experiment_id}-draft.md"
     lines = [
@@ -28,8 +31,12 @@ def draft_report(root: str | Path, experiment_id: str) -> Path:
         "",
         "The current ledger contains " + str(len(runs)) + " recorded run(s). The best recorded primary metric is " + (str(best) if best is not None else "TBD") + ".",
     ]
-    if card.get("reference_metric") is not None:
-        lines += [f"The locked reference metric from `{card.get('reference_experiment_id', 'reference experiment')}` is `{card['reference_metric']}`.", ""]
+    if fresh_baseline:
+        values = [run["metric"] for run in fresh_baseline]
+        mean = sum(values) / len(values)
+        lines += [f"The fresh referenced baseline mean from `{card.get('reference_experiment_id', 'reference experiment')}` is `{mean:.6f}` across seeds `{', '.join(str(run.get('seed')) for run in fresh_baseline)}`.", ""]
+    elif card.get("reference_metric") is not None:
+        lines += [f"The historical reference metric from `{card.get('reference_experiment_id', 'reference experiment')}` is `{card['reference_metric']}`; fresh baseline verification is unavailable.", ""]
     else:
         lines += [""]
     lines += [
