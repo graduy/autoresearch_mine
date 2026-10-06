@@ -18,6 +18,13 @@ metric, timeout, artifact capture, acceptance rule, and stop conditions.
 - Pilot results are for selection. Paper claims require a locked commit,
   multi-seed evidence, and an independent test when the project has one.
 - Missing evidence becomes `TBD`; the report generator never invents metrics.
+- New managed cards use a human-gated research-to-paper workflow: the
+  innovation direction, compute estimate, architecture draft and
+  verification/ablation matrix are edited and approved before training; exact
+  resources are supplied by the human reviewer.
+- After experiments, the human reviewer checks the evidence snapshot and
+  approves the conclusion wording before the Chinese and English first drafts
+  are generated.
 
 ## First adapter
 
@@ -57,7 +64,9 @@ exact code state.
 The integrated handoff is documented in `workflow/INTEGRATED_PIPELINE.md`.
 `pipeline package` writes an evidence manifest, statistical analysis, manuscript
 input, PPT brief, and boss update under `deliverables/<experiment_id>/`. These
-are generated from the same ledger and preserve `TBD` for missing evidence.
+are generated from the same ledger. Human-gated cards additionally receive
+`paper_draft_zh.md` and `paper_draft_en.md` only after conclusion review. The
+gate contract is documented in `workflow/RESEARCH_TO_PAPER_GATES.md`.
 
 ## forautoresearch archive
 

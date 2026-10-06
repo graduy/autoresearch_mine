@@ -7,6 +7,7 @@ from typing import Any
 from .card import load_card
 from .io import read_json
 from .ledger import Ledger
+from .research_gate import gate_snapshot, is_human_gated
 
 
 TERMINAL_STATES = {"candidate_rejected", "human_approval", "complete"}
@@ -92,6 +93,7 @@ def state(root: str | Path, experiment_id: str) -> dict[str, Any]:
     approval = ledger.latest_approval(experiment_id)
     report_path = root / "reports" / f"{experiment_id}-draft.md"
     archive_path = root / "artifacts" / "archives" / experiment_id
+    gates = gate_snapshot(root, card, runs)
 
     base = {
         "experiment_id": experiment_id,
@@ -106,7 +108,25 @@ def state(root: str | Path, experiment_id: str) -> dict[str, Any]:
             "multi_seed_keep_count": len(_kept(runs, "multi_seed")),
             "declared_seeds": card.get("seeds", []),
         },
+        "gates": gates,
     }
+
+    if is_human_gated(card, root):
+        package_gate = gates["innovation_package"]
+        if not package_gate["valid"]:
+            return {**base, "state": "innovation_package", "next_stage": None,
+                    "next_action": "complete the literature synthesis, innovation direction, compute estimate, architecture draft, and verification/ablation matrix",
+                    "blockers": package_gate["errors"]}
+        innovation_gate = gates["innovation_review"]
+        if not innovation_gate["valid"]:
+            return {**base, "state": "human_innovation_review", "next_stage": None,
+                    "next_action": "manually edit and approve the innovation package, then record its file hashes",
+                    "blockers": innovation_gate["errors"]}
+        allocation_gate = gates["compute_allocation"]
+        if not allocation_gate["valid"]:
+            return {**base, "state": "human_compute_allocation", "next_stage": None,
+                    "next_action": "record the exact human-provided GPU, runtime, run-count, VRAM, and cost allocation",
+                    "blockers": allocation_gate["errors"]}
 
     if not approval or approval.get("decision") != "approve":
         return {**base, "state": "human_approval", "next_stage": None,
@@ -148,7 +168,19 @@ def state(root: str | Path, experiment_id: str) -> dict[str, Any]:
         return {**base, "state": stage, "next_stage": stage,
                 "next_action": action, "blockers": []}
 
-    if not report_path.exists():
+    if is_human_gated(card, root):
+        conclusion_gate = gates["conclusion_review"]
+        if not conclusion_gate["valid"]:
+            return {**base, "state": "conclusion_review", "next_stage": None,
+                    "next_action": "manually verify the evidence-backed conclusions before writing the paper drafts",
+                    "blockers": conclusion_gate["errors"]}
+        package = root / "deliverables" / experiment_id
+        draft_paths = [package / "paper_draft_zh.md", package / "paper_draft_en.md"]
+        if not all(path.is_file() for path in draft_paths):
+            return {**base, "state": "paper_draft", "next_stage": None,
+                    "next_action": "generate the Chinese and English first drafts from the approved conclusions",
+                    "blockers": [f"missing paper draft: {path}" for path in draft_paths if not path.is_file()]}
+    elif not report_path.exists():
         return {**base, "state": "report_draft", "next_stage": None,
                 "next_action": "generate the evidence-bound report draft", "blockers": []}
     if not archive_path.exists():

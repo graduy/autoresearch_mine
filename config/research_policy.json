@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "human_gated_workflow": "human_gated_research_to_paper",
+  "historical_experiments": [
+    "nanochat-local",
+    "nanochat-rtx4060",
+    "nanochat-rtx4060-b16",
+    "nanochat-window-slll-b16",
+    "ar-20261005-001-autoresearch-innovation-baseline-b16",
+    "ar-20261005-001-autoresearch-innovation-gated-attention"
+  ],
+  "policy": "New experiment cards must opt into the human-gated research-to-paper contract. Historical cards remain readable and are not retroactively relabeled as having passed the new gates."
+}

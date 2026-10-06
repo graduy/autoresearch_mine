@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from labctl.storage import add_code, add_reference, audit, init_workspace, new_task
+from labctl.storage import add_code, add_reference, audit, bind_card, init_workspace, new_task
 
 
 def _git_repo(tmp_path: Path) -> Path:
@@ -58,3 +58,32 @@ def test_code_snapshot_rejects_weights_and_datasets(tmp_path):
     subprocess.run(["git", "-C", str(repo), "-c", "user.name=test", "-c", "user.email=test@example.com", "commit", "-q", "-m", "weights"], check=True)
     with pytest.raises(ValueError, match="weight/data"):
         add_code(root, task.name, repo, "HEAD", "variant", "unsafe")
+
+
+def test_new_bound_cards_receive_research_to_paper_contract(tmp_path):
+    lab = tmp_path / "lab"
+    (lab / "experiments/cards").mkdir(parents=True)
+    root = tmp_path / "forautoresearch"
+    init_workspace(root, Path(__file__).parents[1])
+    task = new_task(root, "Gated task", "gated-task")
+    repo = _git_repo(tmp_path)
+    code = add_code(root, task.name, repo, "HEAD", "baseline", "baseline")
+    experiment_id = task.name.lower() + "-baseline"
+    card_path = tmp_path / f"{experiment_id}.json"
+    card_path.write_text(json.dumps({
+        "experiment_id": experiment_id,
+        "hypothesis": "The controlled method improves score.",
+        "primary_metric": "score", "metric_direction": "maximize",
+        "stages": {"baseline": {"command": ["python", "-V"], "metric_pattern": "Python ([0-9.]+)"}},
+        "constraints": {"max_runs": 1, "max_runtime_seconds": 60, "max_cost_usd": 0},
+        "human_approval": {"required": True},
+    }), encoding="utf-8")
+    bound = bind_card(root, lab, task.name, card_path, code["code_id"])
+    payload = json.loads(bound.read_text(encoding="utf-8"))
+    assert payload["workflow_mode"] == "human_gated_research_to_paper"
+    assert set(payload["research_package"]) == {
+        "literature_synthesis", "innovation_proposal", "compute_budget",
+        "experiment_matrix", "architecture_spec", "architecture_draft",
+    }
+    assert all(Path(value).is_absolute() for value in payload["research_package"].values())
+    assert set(payload["human_reviews"]) == {"innovation", "compute", "conclusion"}

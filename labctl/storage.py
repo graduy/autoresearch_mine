@@ -276,6 +276,25 @@ def bind_card(root: Path, lab: Path, task_id: str, card_file: str | Path, code_i
             raise FileExistsError("card already registered; create a versioned experiment ID")
         card.update(task_id=task_id, workspace_root=str(root), code_id=code_id,
                     code_root=str(inside(target, code["checkout"])))
+        # Every newly managed experiment uses the human-gated research-to-paper
+        # contract. Absolute paths keep the card valid when the runner executes
+        # from the lab repository while the evidence lives in forautoresearch.
+        card.update(
+            workflow_mode="human_gated_research_to_paper",
+            research_package={
+                "literature_synthesis": str(target / "plans/literature_synthesis.md"),
+                "innovation_proposal": str(target / "plans/innovation_proposal.md"),
+                "compute_budget": str(target / "plans/compute_budget.json"),
+                "experiment_matrix": str(target / "plans/experiment_matrix.json"),
+                "architecture_spec": str(target / "figures/architecture_spec.md"),
+                "architecture_draft": str(target / "figures/drafts/architecture_draft.png"),
+            },
+            human_reviews={
+                "innovation": str(target / "approvals/innovation_review.json"),
+                "compute": str(target / "approvals/compute_allocation.json"),
+                "conclusion": str(target / "approvals/conclusion_review.json"),
+            },
+        )
         card["human_approval"] = {"required": True, "status": "pending"}
         write_json(primary, card)
         write_json(local, card)
@@ -339,6 +358,13 @@ def confirm_task(root: Path, task_id: str, evidence_file: str | Path) -> Path:
             max_seconds += float(limits["max_runs"]) * float(
                 limits.get("training_seconds_per_run", limits["max_runtime_seconds"])
             )
+            if card.get("workflow_mode") == "human_gated_research_to_paper":
+                from .research_gate import validate_compute_allocation
+                lab_card = Path(item["lab_card"]).resolve()
+                lab_root = lab_card.parents[2]
+                gate = validate_compute_allocation(lab_root, card)
+                if not gate["valid"]:
+                    raise ValueError("human innovation and compute review is incomplete: " + "; ".join(gate["errors"]))
         if max_runs > float(budget["max_runs"]) or max_cost > float(budget["max_cost_usd"]) or max_seconds > float(budget["max_gpu_hours"]) * 3600:
             raise ValueError("card limits exceed the reviewed total task budget")
         report = audit(root, task_id)

@@ -7,6 +7,7 @@ from typing import Any
 
 from .card import load_card
 from .ledger import Ledger
+from .research_gate import is_human_gated, validate_conclusion_review
 
 
 def _sha256(path: Path) -> str | None:
@@ -45,6 +46,20 @@ def build_manifest(root: str | Path, experiment_id: str, output: str | Path | No
         })
     declared_seeds = set(card.get("seeds", []))
     kept_multi = {run.get("seed") for run in runs if run["stage"] == "multi_seed" and run["status"] == "keep" and run.get("metric") is not None}
+    conclusion_gate = validate_conclusion_review(root, card, runs) if is_human_gated(card, root) else {"valid": True, "errors": []}
+    human_gate_ready = conclusion_gate["valid"]
+    missing_evidence = {
+        "multi_seed": bool(declared_seeds) and kept_multi >= declared_seeds,
+        "independent_test": bool(card.get("independent_test")),
+        "checkpoint": any("checkpoint" in str(artifact["path"]).lower() for artifact in artifacts),
+    }
+    if is_human_gated(card, root):
+        missing_evidence.update({
+            "innovation_package": bool(conclusion_gate.get("allocation", {}).get("innovation", {}).get("package", {}).get("valid")),
+            "innovation_review": bool(conclusion_gate.get("allocation", {}).get("innovation", {}).get("valid")),
+            "compute_allocation": bool(conclusion_gate.get("allocation", {}).get("valid")),
+            "human_conclusion_review": human_gate_ready,
+        })
     manifest = {
         "schema_version": 1,
         "experiment_id": experiment_id,
@@ -68,14 +83,9 @@ def build_manifest(root: str | Path, experiment_id: str, output: str | Path | No
             "selection_holdout": "pilot results select candidates; they do not establish a final claim",
             "multi_seed": "stability evidence only",
             "independent_test": card.get("independent_test", "TBD"),
-            "paper_ready": bool(declared_seeds) and kept_multi >= declared_seeds and bool(card.get("independent_test")),
-            "missing_evidence": [
-                key for key, present in {
-                    "multi_seed": bool(declared_seeds) and kept_multi >= declared_seeds,
-                    "independent_test": bool(card.get("independent_test")),
-                    "checkpoint": any("checkpoint" in str(artifact["path"]).lower() for artifact in artifacts),
-                }.items() if not present
-            ],
+            "human_gate": "approved" if human_gate_ready else ("required" if is_human_gated(card, root) else "not_enabled"),
+            "paper_ready": bool(declared_seeds) and kept_multi >= declared_seeds and bool(card.get("independent_test")) and human_gate_ready,
+            "missing_evidence": [key for key, present in missing_evidence.items() if not present],
         },
     }
     target = Path(output) if output else root / "reports" / f"{experiment_id}-evidence-manifest.json"

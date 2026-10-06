@@ -6,6 +6,9 @@
   "stages": [
     "literature_scan",
     "relevance_screen",
+    "innovation_package",
+    "human_innovation_review",
+    "human_compute_allocation",
     "experiment_card",
     "human_approval",
     "provision_server",
@@ -15,12 +18,18 @@
     "full",
     "multi_seed",
     "analysis",
+    "conclusion_review",
+    "paper_draft_zh",
+    "paper_draft_en",
     "report_draft",
     "archive",
     "cleanup"
   ],
   "hard_boundaries": [
     "human approval is required before execution or server creation",
+    "new managed cards require a human-edited innovation review and a separate exact compute allocation",
+    "each innovation package contains verification and ablation rows",
+    "paper conclusions require a human-reviewed evidence snapshot and exact bilingual wording",
     "prepare.py, data, evaluator, and dependencies are protected",
     "literature and predicted gains are hypotheses, not measured results",
     "multi_seed records stability and does not require every seed to beat the best seed",

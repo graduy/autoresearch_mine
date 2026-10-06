@@ -6,6 +6,7 @@ from typing import Any
 from .card import load_card
 from .io import read_json
 from .ledger import Ledger
+from .research_gate import is_human_gated, validate_conclusion_review
 from .runner import card_path, project_config
 
 
@@ -15,6 +16,10 @@ def draft_report(root: str | Path, experiment_id: str) -> Path:
     card = load_card(card_path(root, experiment_id))
     ledger = Ledger(root / project["ledger_path"])
     runs = ledger.runs(experiment_id)
+    if is_human_gated(card, root):
+        gate = validate_conclusion_review(root, card, runs)
+        if not gate["valid"]:
+            raise RuntimeError("report draft is blocked until human conclusion review: " + "; ".join(gate["errors"]))
     reference_runs = ledger.runs(card["reference_experiment_id"]) if card.get("reference_experiment_id") else []
     fresh_baseline = [run for run in reference_runs if run.get("stage") == "baseline"
                       and run.get("status") == "keep" and run.get("metric") is not None]

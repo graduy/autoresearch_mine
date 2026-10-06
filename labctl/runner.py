@@ -14,6 +14,7 @@ from .gpu import exclusive_check
 from .integrity import snapshot, verify_snapshot, write_receipt
 from .io import read_json, write_json
 from .ledger import Ledger
+from .research_gate import is_human_gated, validate_compute_allocation
 from .workflow import assert_stage_ready
 from .storage import execution_binding
 
@@ -75,7 +76,20 @@ def run_stage(root: str | Path, experiment_id: str, stage: str, seed: int | None
 
     ledger = Ledger(root / project["ledger_path"])
     ledger.register_experiment(experiment_id, card)
-    constraints = card.get("constraints", {})
+    constraints = dict(card.get("constraints", {}))
+    allocation = None
+    if is_human_gated(card, root):
+        allocation_gate = validate_compute_allocation(root, card)
+        if not allocation_gate["valid"]:
+            raise RuntimeError("human compute allocation gate is invalid: " + "; ".join(allocation_gate["errors"]))
+        allocation = allocation_gate["allocation"]
+        for key in ("max_runtime_seconds", "max_runs", "max_vram_gb", "max_cost_usd"):
+            allocated = allocation.get(key)
+            if allocated is None:
+                continue
+            current = constraints.get(key)
+            constraints[key] = float(allocated) if current is None else min(float(current), float(allocated))
+        constraints["max_gpu_hours"] = float(allocation["max_gpu_hours"])
     previous_runs = ledger.runs(experiment_id)
     if constraints.get("max_runs") is not None and len(previous_runs) >= int(constraints["max_runs"]):
         raise RuntimeError("experiment max_runs budget reached")
@@ -110,7 +124,7 @@ def run_stage(root: str | Path, experiment_id: str, stage: str, seed: int | None
     write_json(run_dir / "run_request.json", {
         "run_id": run_id, "experiment_id": experiment_id, "stage": stage,
         "seed": seed, "command": command, "code_root": str(code_root),
-        "before": before, "gpu_preflight": gpu_preflight,
+        "before": before, "gpu_preflight": gpu_preflight, "compute_allocation": allocation,
     })
     ledger.start_run({
         "run_id": run_id, "experiment_id": experiment_id, "stage": stage,
@@ -150,9 +164,11 @@ def run_stage(root: str | Path, experiment_id: str, stage: str, seed: int | None
     scope = verify_snapshot(before, after, code_root)
     cost = _cost(runtime, project)
     spent_cost = sum(float(run.get("cost_usd") or 0.0) for run in previous_runs)
+    spent_gpu_hours = sum(float(run.get("runtime_seconds") or 0.0) for run in previous_runs) / 3600.0
     budget_violation = (
         (constraints.get("max_runtime_seconds") is not None and runtime > float(constraints["max_runtime_seconds"]))
         or (constraints.get("max_cost_usd") is not None and spent_cost + cost > float(constraints["max_cost_usd"]))
+        or (constraints.get("max_gpu_hours") is not None and spent_gpu_hours + runtime / 3600.0 > float(constraints["max_gpu_hours"]))
         or (constraints.get("max_vram_gb") is not None and peak_vram is not None and peak_vram > float(constraints["max_vram_gb"]) * 1024)
     )
     if exit_code == 0 and metric is not None and scope["passed"] and not budget_violation:
@@ -197,6 +213,7 @@ def run_stage(root: str | Path, experiment_id: str, stage: str, seed: int | None
         "peak_vram_mb": peak_vram, "runtime_seconds": runtime,
         "scope_check": scope, "before": before, "after": after,
         "unset_environment": project.get("unset_environment", []),
+        "compute_allocation": allocation,
         "gpu_postflight": gpu_postflight,
         "rollback": rollback,
         "status": status,

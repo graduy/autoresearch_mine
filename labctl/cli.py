@@ -162,6 +162,9 @@ def main(argv: list[str] | None = None) -> int:
             load_card(card_path(root, args.experiment))
             if not ledger.approved(args.experiment):
                 raise SystemExit("server create requires approval")
+            current = workflow_state(root, args.experiment)
+            if current.get("state") not in {"baseline", "pilot", "full", "multi_seed"}:
+                raise SystemExit(f"server create is blocked by workflow gate: {current.get('next_action')}")
             path = root / "artifacts" / "servers" / f"{args.experiment}.json"
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(json.dumps({"experiment_id": args.experiment, "backend": "local", "status": "active"}, indent=2) + "\n", encoding="utf-8")
@@ -192,7 +195,10 @@ def main(argv: list[str] | None = None) -> int:
         if args.workflow_command in {"status", "next", "validate"}:
             current = workflow_state(root, args.experiment)
             print(json.dumps(current, ensure_ascii=False, indent=2, sort_keys=True))
-            if args.workflow_command == "validate" and current["state"] in {"human_approval", "blocked", "candidate_rejected"}:
+            if args.workflow_command == "validate" and current["state"] in {
+                "innovation_package", "human_innovation_review", "human_compute_allocation",
+                "human_approval", "blocked", "candidate_rejected", "conclusion_review", "paper_draft",
+            }:
                 return 1
             return 0
         if args.workflow_command == "ingest":

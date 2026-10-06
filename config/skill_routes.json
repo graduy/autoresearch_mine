@@ -28,8 +28,8 @@
       "stage": "ideation",
       "image_skill_name": "scientific-brainstorming",
       "status": "adapter",
-      "implementation": "experiment card hypothesis + innovation candidate list",
-      "human_gate": "direction and budget approval"
+      "implementation": "research package with literature synthesis, innovation proposal, architecture draft and verification/ablation matrix",
+      "human_gate": "human-edited innovation review followed by exact compute allocation"
     },
     {
       "stage": "literature",
@@ -50,7 +50,7 @@
       "image_skill_name": "statistical-analysis",
       "status": "integrated_local_adapter",
       "implementation": "labctl analysis; descriptive stats and bootstrap CI only when n permits",
-      "human_gate": "analysis review before claims"
+      "human_gate": "evidence snapshot and conclusion review before claims"
     },
     {
       "stage": "figures",
@@ -63,8 +63,8 @@
       "stage": "manuscript",
       "image_skill_name": "nature-writing / nature-polishing / nature-reviewer / nature-response / nature-data",
       "status": "handoff_adapter",
-      "implementation": "evidence manifest + paper_input.md + claim boundary; exact named skills not installed",
-      "human_gate": "author review and claim audit"
+      "implementation": "evidence manifest + human-approved conclusion record + bilingual paper drafts",
+      "human_gate": "human conclusion review with run references and exact wording"
     },
     {
       "stage": "presentation",

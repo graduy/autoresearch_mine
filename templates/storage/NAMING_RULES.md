@@ -19,3 +19,13 @@
 ## 状态
 
 `proposed → confirmed → baseline → pilot → full → multi_seed → analysis → report_draft → archive → complete`。`rejected`、`blocked` 和 `historical` 只能由记录说明的人工或证据状态产生；建议、预测收益和文献结果不能写入实测指标字段。
+
+## 研究包与审核
+
+每个新课题使用固定文件名：`plans/literature_synthesis.md`、
+`plans/innovation_proposal.md`、`plans/compute_budget.json`、
+`plans/experiment_matrix.json`、`figures/architecture_spec.md`、
+`figures/drafts/architecture_draft.png`；审核文件为
+`approvals/innovation_review.json`、`approvals/compute_allocation.json` 和
+`approvals/conclusion_review.json`。论文初稿固定为
+`paper/zh/<task>-draft-vN.md` 和 `paper/en/<task>-draft-vN.md`。

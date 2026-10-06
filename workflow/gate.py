@@ -32,7 +32,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.command in {"next", "validate"}:
         payload = state(ROOT, args.experiment)
         print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
-        if args.command == "validate" and payload["state"] in {"human_approval", "blocked", "candidate_rejected"}:
+        if args.command == "validate" and payload["state"] in {
+            "innovation_package", "human_innovation_review", "human_compute_allocation",
+            "human_approval", "blocked", "candidate_rejected", "conclusion_review", "paper_draft",
+        }:
             return 1
         return 0
     print(json.dumps(validate_ingest(ROOT, args.experiment, args.result), ensure_ascii=False, indent=2, sort_keys=True))
