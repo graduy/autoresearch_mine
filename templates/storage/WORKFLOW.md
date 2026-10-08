@@ -1,7 +1,7 @@
 # forautoresearch 工作流
 
 1. 文献进入 `reference/`，先登记来源和阅读深度。
-2. 核心策略是“参考优先复现 + 受控增量扩展”：先完整复现参考论文 baseline 和实验协议，再只替换一个近两年方法组件；不从零开宗立派，也不把这个流程当作必然发表保证。候选创新写入课题 `ideas/candidates/`，形成 `plans/innovation_proposal.md`；第一步人工审核同时检查 `plans/baseline_reference.json`：期刊须为 SCI/SCIE、中科院大类 1/2 区且 IF>4，会议须有正式全文、同行评审和会议等级依据；记录论文 baseline、实验方案和最终方案对比表。每条方向都写清来源、代码改动、对照、风险、停止条件和预期成本。研究包还必须有架构说明、架构草图，以及同时包含 `reference_reproduction`、`recent_extension` 和 `ablation` 的实验矩阵。
+2. 核心策略是“参考优先复现 + 近两年方法整体方案优化”：先完整复现参考论文 baseline 和实验协议，再从自定义的近两年 CV 三大会议、机器学习三大会议及本地代码库筛选多个互补方法，组合成一个整体候选方案；不能只替换一个模块，也不把这个流程当作必然发表保证。候选创新写入课题 `ideas/candidates/`，形成 `plans/innovation_proposal.md`；第一步人工审核同时检查 `plans/baseline_reference.json`：期刊须为 SCI/SCIE、中科院大类 1/2 区且 IF>4，会议须有正式全文、同行评审和会议等级依据；记录论文 baseline、实验方案和最终方案对比表。每条方向都写清来源、代码路径、整体改动、对照、风险、停止条件和预期成本。研究包还必须有架构说明、架构草图，以及同时包含 `reference_reproduction`、`recent_optimization` 和 `ablation` 的实验矩阵。
 3. 把可运行的基线或变体登记到 `code/`，生成独立代码快照；不要把用户未授权的数据、权重或凭据复制进档案库。
 4. 写实验卡并绑定 `code_id`。实验卡固定评估器、数据清单、主指标、预算、种子和阶段。
 5. 写 `plans/compute_budget.json`。课题保持 `proposed`，直到用户人工修改并审核创新包，再单独填写精确 GPU、显存、GPU 小时、运行次数、运行时限和费用上限。

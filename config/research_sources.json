@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "lookback_years": 2,
+  "cv_venue_scope": ["CVPR", "ICCV", "ECCV"],
+  "ml_venue_scope": ["NeurIPS", "ICML", "ICLR"],
+  "policy": "Use these venue scopes by default. A task may customize the scope and year window in baseline_reference.local_code_library, recording the selection basis. These are method-discovery sources; baseline-paper eligibility is checked separately."
+}

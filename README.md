@@ -19,15 +19,16 @@ metric, timeout, artifact capture, acceptance rule, and stop conditions.
   multi-seed evidence, and an independent test when the project has one.
 - Missing evidence becomes `TBD`; the report generator never invents metrics.
 - New managed cards use a human-gated research-to-paper workflow: the
-  reference paper is reproduced first, then one recent method is substituted
-  under the same protocol as a controlled extension; the workflow does not
-  assume that this guarantees publication. The package also requires an
-  eligible SCI/SCIE journal baseline paper in Chinese Academy of Sciences
-  major-category 1 or 2 (impact factor > 4), its baseline and
-  experiment scheme, the final-scheme comparison table, innovation direction,
-  compute estimate, architecture draft and verification/ablation matrix are
-  shown for human review before training; exact resources are supplied by the
-  human reviewer.
+  reference paper is reproduced first, then several complementary methods from
+  a declared two-year CV/ML venue scope and the local code library are combined
+  into one whole-system candidate. The workflow does not assume that this
+  guarantees publication or proves a global optimum. The package also requires
+  an eligible SCI/SCIE journal baseline paper in Chinese Academy of Sciences
+  major-category 1 or 2 (impact factor > 4), its baseline and experiment
+  scheme, the final-scheme comparison table, innovation direction, local code
+  records, architecture draft, and verification/ablation matrix. The first
+  review displays the budget as “共有 X 个实验需要跑；需要 X 张卡跑 X 小时；
+  推荐租 X 张 X 卡”; exact resources are supplied by the human reviewer.
 - After experiments, the human reviewer checks the evidence snapshot and
   approves the conclusion wording before the Chinese and English first drafts
   are generated.
@@ -80,6 +81,12 @@ The separate local archive at `/home/grady/forautoresearch` keeps literature,
 innovation proposals, per-task code snapshots, runs, results, papers, figures,
 and presentations under one auditable task ID. It is intentionally separate
 from the upstream code checkout and from any synced ChatGPT project files.
+
+The default recent-method discovery scope is recorded in
+`config/research_sources.json`: CVPR, ICCV and ECCV plus NeurIPS, ICML and ICLR
+over the previous two publication years. A task may customize the three-plus-
+three venue sets, but must record the selection basis and local code paths in
+`baseline_reference.local_code_library`.
 
 ```bash
 PYTHONPATH=. python3 -m labctl storage init

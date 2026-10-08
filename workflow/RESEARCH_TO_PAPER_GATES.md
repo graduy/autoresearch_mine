@@ -22,11 +22,13 @@ literature_scan
 A card may omit pilot or full for a deliberately smaller experiment, but the
 remaining stages keep their order. `innovation_package` must include:
 
-- the strategy declaration `reference_first_reproduction_and_extension`:
-  reproduce the selected paper's baseline and protocol first, then replace one
-  declared component with a recent method from the current or previous two
-  publication years; this is a controlled extension, not an independent
-  architecture claim;
+- the strategy declaration `reference_first_reproduction_and_whole_system_optimization`:
+  reproduce the selected paper's baseline and protocol first, then select
+  several complementary methods from the current or previous two publication
+  years and combine them into one coherent whole-system candidate. Every
+  changed component, source and compatibility reason is recorded. This is a
+  controlled optimization based on prior work, not an independent architecture
+  claim;
 - a literature synthesis and one concrete innovation direction;
 - a source-backed baseline paper record in `baseline_reference.json`. For a
   journal, the default qualification is SCI/SCIE indexed, Chinese Academy of
@@ -38,16 +40,22 @@ remaining stages keep their order. `innovation_package` must include:
 - a comparison table with separate rows for model/baseline, data and split,
   training protocol, evaluation metrics and ablation protocol. This table is
   shown as part of the first `human_innovation_review` payload;
-- an estimated compute budget;
+- an estimated compute budget with the explicit sentence structure “共有 X 个
+  实验需要跑；需要 X 张卡跑 X 小时；推荐租 X 张 <GPU>”. The machine-readable
+  fields are checked by the gate;
+- a local-code-library record covering a custom scope of at least three CV
+  venues and three machine-learning venues from the current and previous two
+  publication years. Each selected method must point to a local code path and
+  source record;
 - a source-grounded architecture specification and reviewable PNG/JPEG/WebP
   draft;
 - an `experiment_matrix.json` with both `verification` and `ablation` rows.
 
 Each matrix row names `id`, `category`, `strategy_role`, `experiment_id`,
 `stage`, unique integer `seeds`, `hypothesis`, `control`, `change`, `metric` and
-`pass_rule`. `strategy_role` is `reference_reproduction`, `recent_extension`
-or `ablation`. The reproduction row must run at `baseline`; the extension row
-must run after that baseline stage. The card
+`pass_rule`. `strategy_role` is `reference_reproduction`, `recent_optimization`
+or `ablation`. The reproduction row must run at `baseline`; the optimization
+row must run after that baseline stage. The card
 named by `experiment_id` must exist, declare the row's stage and use the same
 primary metric. An ablation row also names the removed or replaced `component`.
 This binds the validity check and ablation to executable cards rather than to a
@@ -103,8 +111,8 @@ first human review:
 
 ```json
 {
-  "research_strategy": "reference_first_reproduction_and_extension",
-  "publication_positioning": "reproduction_plus_controlled_extension",
+  "research_strategy": "reference_first_reproduction_and_whole_system_optimization",
+  "publication_positioning": "reproduction_plus_whole_system_optimization",
   "paper": {
     "title": "<paper title>",
     "venue": "<journal, conference or other publication venue>",
@@ -148,13 +156,25 @@ first human review:
     "acceptance_rule": "<predeclared reproduction tolerance>",
     "source_location": "<paper methods and experiment sections>"
   },
-  "recent_extension": {
-    "method": "<one recent method>",
-    "source": "<recent paper source>",
-    "publication_year": 2025,
-    "change_scope": "<single changed component>",
-    "replacement_target": "<reference component being replaced>",
-    "source_location": "<recent paper and extension plan>"
+  "recent_optimization": {
+    "optimization_scope": "whole_system",
+    "selected_methods": ["<method A>", "<method B>"],
+    "method_sources": ["<paper/code source A>", "<paper/code source B>"],
+    "publication_years": [2025, 2026],
+    "changed_components": ["<component A>", "<component B>"],
+    "coherence_rationale": "<why the selected methods form one coherent scheme>",
+    "source_location": "<recent papers, local code records and optimization plan>"
+  },
+  "local_code_library": {
+    "root": "<local code library root>",
+    "lookback_years": 2,
+    "scope_basis": "<why these venue scopes were selected>",
+    "cv_venue_scope": ["<CV venue 1>", "<CV venue 2>", "<CV venue 3>"],
+    "ml_venue_scope": ["<ML venue 1>", "<ML venue 2>", "<ML venue 3>"],
+    "records": [{
+      "venue": "<venue>", "year": 2025, "method": "<method>",
+      "code_path": "<path in local library>", "source_location": "<record>"
+    }]
   },
   "final_experiment_scheme": {
     "method": "<final method>",
@@ -165,6 +185,11 @@ first human review:
     "metrics": ["<metric>"],
     "ablation_plan": "<ablation plan>",
     "experiment_matrix_sha256": "<sha256 of current experiment_matrix.json>"
+  },
+  "candidate_selection": {
+    "status": "candidate_best_under_recorded_evidence",
+    "basis": "<why this whole-system candidate is preferred under the recorded comparison>",
+    "alternatives_considered": ["<reference only>", "<other candidate>"]
   },
   "comparison_table": [
     {
@@ -189,11 +214,13 @@ basis. It must not be assigned a journal impact factor or CAS quartile. A
 missing, ineligible or incomplete baseline record keeps the workflow at
 `human_innovation_review` and prevents compute allocation and execution.
 
-The publication position is recorded as a reproduction plus controlled
-extension. The workflow may prepare a paper draft only after the reference
-protocol is reproduced, the recent replacement is compared under the same
-data/evaluator, and the ablation and multi-seed evidence support the claim.
-This workflow does not promise acceptance or publication.
+The publication position is recorded as a reproduction plus controlled whole-
+system optimization. The workflow may prepare a paper draft only after the
+reference protocol is reproduced, the selected recent methods are evaluated as
+one coherent candidate under the same data/evaluator, and the ablation and
+multi-seed evidence support the claim. “Current possibly best” is a candidate
+selection under the recorded evidence, not a measured global optimum. This
+workflow does not promise acceptance or publication.
 
 ## Review records
 
@@ -236,6 +263,38 @@ Compute allocation:
   "max_vram_gb": 8, "max_cost_usd": 0
 }
 ```
+
+The proposal budget must also make the rental decision readable without
+recomputing it:
+
+```json
+{
+  "estimated_gpu_hours": 24,
+  "estimated_runs": 3,
+  "assumptions": "Each experiment uses the locked data and evaluator.",
+  "schedule_basis": "Each matrix row and seed has a declared GPU count and duration.",
+  "run_estimates": [
+    {"row_id": "V1", "seed": 1, "gpu_count": 4, "hours": 2, "estimate_source": "baseline reproduction estimate"},
+    {"row_id": "V2", "seed": 1, "gpu_count": 4, "hours": 2, "estimate_source": "whole-system optimization estimate"},
+    {"row_id": "A1", "seed": 1, "gpu_count": 4, "hours": 2, "estimate_source": "ablation estimate"}
+  ],
+  "budget_summary": {
+    "total_experiments": 3,
+    "gpu_type": "<GPU model>",
+    "required_gpu_count": 4,
+    "wall_clock_hours": 6,
+    "recommended_gpu_count": 4,
+    "recommended_hours": 6,
+    "recommended_rental": "推荐租4张<GPU model>，运行6小时"
+  }
+}
+```
+
+The sentence means: 3 experiments in total, 4 GPUs required for 6 hours,
+and the recommended rental is 4 GPUs of the declared model for 6 hours. The
+`run_estimates` must enumerate every matrix row and seed, and its GPU-hours
+must sum to `estimated_gpu_hours`. The numbers are a plan until the human
+reviewer supplies the exact allocation.
 
 Conclusion review:
 

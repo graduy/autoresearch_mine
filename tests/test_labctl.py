@@ -54,19 +54,42 @@ def _human_gated_fixture(tmp_path: Path) -> tuple[Path, dict]:
 def _write_human_package(root: Path, card: dict) -> dict[str, str]:
     package = root / "plans/gated"
     package.mkdir(parents=True)
+    library = root / "local-code/models"
+    library.mkdir(parents=True)
+    (library / "temporal_aggregation.py").write_text("# source", encoding="utf-8")
+    (library / "light_decoder.py").write_text("# source", encoding="utf-8")
     (package / "literature.md").write_text("The cited literature supports the proposed controlled comparison.", encoding="utf-8")
     (package / "innovation.md").write_text("Use the proposed module under the locked evaluator and compare it with the baseline.", encoding="utf-8")
-    (package / "compute.json").write_text(json.dumps({"estimated_gpu_hours": 2, "estimated_runs": 4, "assumptions": "One local GPU per run."}), encoding="utf-8")
+    (package / "compute.json").write_text(json.dumps({
+        "estimated_gpu_hours": 24,
+        "estimated_runs": 3,
+        "assumptions": "Three experiments are scheduled on four local GPUs with wall-clock margin.",
+        "schedule_basis": "Three matrix rows each use four GPUs for two hours; the wall-clock recommendation includes scheduling margin.",
+        "budget_summary": {
+            "total_experiments": 3,
+            "gpu_type": "RTX 4060",
+            "required_gpu_count": 4,
+            "wall_clock_hours": 6,
+            "recommended_gpu_count": 4,
+            "recommended_hours": 6,
+            "recommended_rental": "推荐租4张RTX 4060，运行6小时",
+        },
+        "run_estimates": [
+            {"row_id": "V1", "seed": 1, "gpu_count": 4, "hours": 2, "estimate_source": "baseline reproduction estimate"},
+            {"row_id": "V2", "seed": 1, "gpu_count": 4, "hours": 2, "estimate_source": "whole-system optimization estimate"},
+            {"row_id": "A1", "seed": 1, "gpu_count": 4, "hours": 2, "estimate_source": "ablation estimate"},
+        ],
+    }), encoding="utf-8")
     (package / "matrix.json").write_text(json.dumps({"rows": [
         {"id": "V1", "category": "verification", "strategy_role": "reference_reproduction", "experiment_id": "gated-e1", "stage": "baseline", "seeds": [1], "hypothesis": "The reference protocol reproduces the baseline.", "control": "paper baseline", "change": "faithful reproduction", "metric": "score", "pass_rule": "reproduction meets the declared acceptance rule"},
-        {"id": "V2", "category": "verification", "strategy_role": "recent_extension", "experiment_id": "gated-e1", "stage": "pilot", "seeds": [1], "hypothesis": "The recent method improves the reproduced baseline.", "control": "reproduced baseline", "change": "single recent replacement", "metric": "score", "pass_rule": "extension passes the predeclared comparison rule"},
-        {"id": "A1", "category": "ablation", "strategy_role": "ablation", "experiment_id": "gated-e1", "stage": "pilot", "seeds": [1], "component": "recent module", "hypothesis": "Removing the recent module identifies its contribution.", "control": "recent extension", "change": "remove recent module", "metric": "score", "pass_rule": "ablation is interpreted with the paired extension"},
+        {"id": "V2", "category": "verification", "strategy_role": "recent_optimization", "experiment_id": "gated-e1", "stage": "pilot", "seeds": [1], "hypothesis": "The whole-system candidate improves the reproduced baseline.", "control": "reproduced baseline", "change": "coherent combination of selected recent methods", "metric": "score", "pass_rule": "optimization passes the predeclared comparison rule"},
+        {"id": "A1", "category": "ablation", "strategy_role": "ablation", "experiment_id": "gated-e1", "stage": "pilot", "seeds": [1], "component": "selected recent method set", "hypothesis": "Removing the selected method set identifies its contribution.", "control": "whole-system optimization", "change": "remove the selected method set", "metric": "score", "pass_rule": "ablation is interpreted with the paired optimization"},
     ]}), encoding="utf-8")
     (package / "architecture.md").write_text("Inputs -> proposed module -> evaluator", encoding="utf-8")
     (package / "architecture.png").write_bytes(b"\x89PNG\r\n\x1a\narchitecture draft")
     (package / "baseline_reference.json").write_text(json.dumps({
-        "research_strategy": "reference_first_reproduction_and_extension",
-        "publication_positioning": "reproduction_plus_controlled_extension",
+        "research_strategy": "reference_first_reproduction_and_whole_system_optimization",
+        "publication_positioning": "reproduction_plus_whole_system_optimization",
         "paper": {
             "title": "A source-backed baseline paper",
             "venue": "Journal of Controlled Research",
@@ -110,13 +133,25 @@ def _write_human_package(root: Path, card: dict) -> dict[str, str]:
             "acceptance_rule": "Reproduction must satisfy the predeclared metric tolerance before extension runs.",
             "source_location": "paper methods and experiment sections",
         },
-        "recent_extension": {
-            "method": "A single recent module selected after the reference reproduction",
-            "source": "Recent peer-reviewed method record",
-            "publication_year": 2025,
-            "change_scope": "Replace one declared component while keeping the reference protocol fixed.",
-            "replacement_target": "The selected baseline module",
-            "source_location": "recent method paper and extension plan",
+        "recent_optimization": {
+            "optimization_scope": "whole_system",
+            "selected_methods": ["Recent temporal aggregation", "Recent lightweight decoder"],
+            "method_sources": ["Recent peer-reviewed method record A", "Recent peer-reviewed method record B"],
+            "publication_years": [2025, 2026],
+            "changed_components": ["temporal aggregation", "decoder", "training schedule"],
+            "coherence_rationale": "The selected methods address complementary temporal and efficiency limits and are evaluated as one coherent candidate.",
+            "source_location": "recent method papers and extension plan",
+        },
+        "local_code_library": {
+            "root": str(root / "local-code"),
+            "lookback_years": 2,
+            "scope_basis": "Custom venue scope chosen for the task: three CV venues and three ML venues.",
+            "cv_venue_scope": ["CV Venue A", "CV Venue B", "CV Venue C"],
+            "ml_venue_scope": ["ML Venue A", "ML Venue B", "ML Venue C"],
+            "records": [
+                {"venue": "CV Venue A", "year": 2025, "method": "Recent temporal aggregation", "code_path": "models/temporal_aggregation.py", "source_location": "local code index"},
+                {"venue": "ML Venue A", "year": 2026, "method": "Recent lightweight decoder", "code_path": "models/light_decoder.py", "source_location": "local code index"},
+            ],
         },
         "final_experiment_scheme": {
             "method": "Proposed method",
@@ -127,6 +162,11 @@ def _write_human_package(root: Path, card: dict) -> dict[str, str]:
             "metrics": ["score"],
             "ablation_plan": "Remove the proposed module under the same protocol",
             "experiment_matrix_sha256": hashlib.sha256((package / "matrix.json").read_bytes()).hexdigest(),
+        },
+        "candidate_selection": {
+            "status": "candidate_best_under_recorded_evidence",
+            "basis": "Selected after comparing the reference reproduction with the coherent recent-method candidate and its ablation plan.",
+            "alternatives_considered": ["reference reproduction only", "single-method replacement"],
         },
         "comparison_table": [
             {"dimension_key": "model_baseline", "dimension": "Model/baseline", "reference_paper": "Locked reference model", "final_scheme": "Proposed method", "decision_or_difference": "Controlled method change", "source_location": "paper section 3; plan section 2"},
@@ -150,7 +190,7 @@ def _write_innovation_review(root: Path, package_hashes: dict[str, str]) -> None
         "edit_summary": "Adjusted the proposed module and fixed the ablation pass rule.",
         "baseline_eligibility_checked": True,
         "reference_reproduction_checked": True,
-        "recent_extension_checked": True,
+        "recent_optimization_checked": True,
         "protocol_comparison_checked": True,
         "conference_quality_confirmed": False,
         "package_sha256": package_hashes,
@@ -167,7 +207,7 @@ def _write_compute_review(root: Path) -> None:
         "decision": "approve", "human_reviewed": True, "reviewer": "tester", "actor": "user",
         "reviewed_at": "2026-10-06T10:05:00+08:00", "allocation_basis": "Local RTX 4060 reservation.",
         "source_thread_id": "test-thread", "user_quote": "I provided the exact compute allocation.",
-        "innovation_review_sha256": digest, "gpu_type": "RTX 4060", "gpu_count": 1,
+        "innovation_review_sha256": digest, "gpu_type": "RTX 4060", "gpu_count": 4,
         "vram_gb": 8, "max_gpu_hours": 2, "max_runtime_seconds": 60,
         "max_runs": 4, "max_vram_gb": 8, "max_cost_usd": 0,
     }), encoding="utf-8")
@@ -317,6 +357,9 @@ def test_human_gated_workflow_requires_package_reviews_and_allocation(tmp_path):
     baseline_review = first_review["gates"]["baseline_reference"]
     assert baseline_review["valid"] is True
     assert len(baseline_review["comparison_table"]) == 5
+    assert first_review["gates"]["innovation_package"]["compute_budget"]["summary_text"] == (
+        "共有 3 个实验需要跑；需要 4 张 RTX 4060 跑 6 小时；推荐租 4 张 RTX 4060，运行 6 小时。"
+    )
     _write_innovation_review(root, hashes)
     assert state(root, card["experiment_id"])["state"] == "human_compute_allocation"
     _write_compute_review(root)

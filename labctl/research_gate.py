@@ -27,8 +27,8 @@ BASELINE_COMPARISON_KEYS = {
     "model_baseline", "data_split", "training_protocol",
     "evaluation_metrics", "ablation_protocol",
 }
-RESEARCH_STRATEGY = "reference_first_reproduction_and_extension"
-MATRIX_STRATEGY_ROLES = {"reference_reproduction", "recent_extension", "ablation"}
+RESEARCH_STRATEGY = "reference_first_reproduction_and_whole_system_optimization"
+MATRIX_STRATEGY_ROLES = {"reference_reproduction", "recent_optimization", "ablation"}
 WAITING_STATES = {
     "innovation_package", "human_innovation_review", "human_compute_allocation",
     "human_approval", "blocked", "candidate_rejected", "experiment_matrix",
@@ -163,8 +163,8 @@ def validate_baseline_reference(root: str | Path, card: dict[str, Any]) -> dict[
 
     if payload.get("research_strategy") != RESEARCH_STRATEGY:
         errors.append(f"baseline_reference.research_strategy must be {RESEARCH_STRATEGY}")
-    if payload.get("publication_positioning") != "reproduction_plus_controlled_extension":
-        errors.append("baseline_reference.publication_positioning must be reproduction_plus_controlled_extension")
+    if payload.get("publication_positioning") != "reproduction_plus_whole_system_optimization":
+        errors.append("baseline_reference.publication_positioning must be reproduction_plus_whole_system_optimization")
 
     paper = payload.get("paper")
     _required_text_fields(
@@ -240,16 +240,88 @@ def validate_baseline_reference(root: str | Path, card: dict[str, Any]) -> dict[
         ("protocol_lock", "allowed_deviations", "acceptance_rule", "source_location"), errors,
     )
 
-    extension = payload.get("recent_extension")
+    optimization = payload.get("recent_optimization")
     _required_text_fields(
-        extension, "baseline_reference.recent_extension",
-        ("method", "source", "change_scope", "replacement_target", "source_location"), errors,
+        optimization, "baseline_reference.recent_optimization",
+        ("optimization_scope", "coherence_rationale", "source_location"), errors,
     )
-    if isinstance(extension, dict) and not _valid_year(extension.get("publication_year")):
-        errors.append("baseline_reference.recent_extension.publication_year must be a valid year")
-    if isinstance(extension, dict) and _valid_year(extension.get("publication_year")):
-        if extension["publication_year"] < datetime.now().year - 2:
-            errors.append("baseline_reference.recent_extension must be from the current or previous two publication years")
+    if isinstance(optimization, dict):
+        if optimization.get("optimization_scope") != "whole_system":
+            errors.append("baseline_reference.recent_optimization.optimization_scope must be whole_system")
+        _required_text_list(optimization.get("selected_methods"),
+                            "baseline_reference.recent_optimization.selected_methods", errors)
+        _required_text_list(optimization.get("method_sources"),
+                            "baseline_reference.recent_optimization.method_sources", errors)
+        _required_text_list(optimization.get("changed_components"),
+                            "baseline_reference.recent_optimization.changed_components", errors)
+        for key in ("selected_methods", "changed_components"):
+            values = optimization.get(key)
+            if isinstance(values, list) and all(_text(item) for item in values) and len(set(values)) < 2:
+                errors.append(f"baseline_reference.recent_optimization.{key} needs at least two distinct values for a whole-system scheme")
+        years = optimization.get("publication_years")
+        if (not isinstance(years, list) or not years
+                or not all(_valid_year(year) for year in years)):
+            errors.append("baseline_reference.recent_optimization.publication_years must contain valid years")
+        methods = optimization.get("selected_methods")
+        sources = optimization.get("method_sources")
+        if isinstance(methods, list) and (not isinstance(sources, list) or not isinstance(years, list)
+                                         or len(methods) != len(sources) or len(methods) != len(years)):
+            errors.append("recent_optimization selected_methods, method_sources and publication_years must align")
+
+    local_library = payload.get("local_code_library")
+    _required_text_fields(local_library, "baseline_reference.local_code_library",
+                          ("root", "scope_basis"), errors)
+    if isinstance(local_library, dict):
+        lookback = local_library.get("lookback_years")
+        if not _number(lookback, positive=True, integer=True):
+            errors.append("baseline_reference.local_code_library.lookback_years must be a positive integer (default 2)")
+        _required_text_list(local_library.get("cv_venue_scope"),
+                            "baseline_reference.local_code_library.cv_venue_scope", errors)
+        _required_text_list(local_library.get("ml_venue_scope"),
+                            "baseline_reference.local_code_library.ml_venue_scope", errors)
+        scope = set()
+        for key in ("cv_venue_scope", "ml_venue_scope"):
+            venues = local_library.get(key)
+            if isinstance(venues, list) and all(_text(venue) for venue in venues):
+                scope.update(venues)
+                if len(set(venues)) < 3:
+                    errors.append(f"baseline_reference.local_code_library.{key} must list at least three venues")
+                if len(set(venues)) != len(venues):
+                    errors.append(f"baseline_reference.local_code_library.{key} must not repeat venues")
+        library_root = resolve(root, local_library.get("root"))
+        if library_root is None or not library_root.is_dir():
+            errors.append("baseline_reference.local_code_library.root must be an existing local directory")
+        records = local_library.get("records")
+        recorded_methods = set()
+        if not isinstance(records, list) or not records:
+            errors.append("baseline_reference.local_code_library.records must be a non-empty list")
+        else:
+            for index, record in enumerate(records):
+                _required_text_fields(
+                    record, f"baseline_reference.local_code_library.records[{index}]",
+                    ("venue", "method", "code_path", "source_location"), errors,
+                )
+                if isinstance(record, dict):
+                    if _text(record.get("method")):
+                        recorded_methods.add(record["method"])
+                    if record.get("venue") not in scope:
+                        errors.append(f"local_code_library.records[{index}].venue is outside the declared scope")
+                    if not _valid_year(record.get("year")):
+                        errors.append(f"baseline_reference.local_code_library.records[{index}].year must be a valid year")
+                    elif _number(lookback, positive=True, integer=True) and record["year"] < datetime.now().year - lookback:
+                        errors.append(f"local_code_library.records[{index}].year is outside the declared year window")
+                    code_path = resolve(library_root or root, record.get("code_path"))
+                    if code_path is None or not code_path.exists():
+                        errors.append(f"local_code_library.records[{index}].code_path does not exist")
+        if isinstance(optimization, dict):
+            selected = optimization.get("selected_methods")
+            if isinstance(selected, list) and all(_text(item) for item in selected):
+                if not set(selected).issubset(recorded_methods):
+                    errors.append("every selected method needs a local_code_library record")
+            years = optimization.get("publication_years")
+            if isinstance(years, list) and _number(lookback, positive=True, integer=True):
+                if any(_valid_year(year) and year < datetime.now().year - lookback for year in years):
+                    errors.append("recent_optimization.publication_years are outside the declared year window")
 
     final_scheme = payload.get("final_experiment_scheme")
     _required_text_fields(
@@ -264,6 +336,14 @@ def validate_baseline_reference(root: str | Path, card: dict[str, Any]) -> dict[
             errors.append("baseline_reference.final_experiment_scheme must bind the current experiment_matrix_sha256")
         if card.get("primary_metric") not in (final_scheme.get("metrics") or []):
             errors.append("baseline_reference.final_experiment_scheme.metrics must include the card primary_metric")
+
+    selection = payload.get("candidate_selection")
+    _required_text_fields(selection, "baseline_reference.candidate_selection", ("status", "basis"), errors)
+    if isinstance(selection, dict):
+        if selection.get("status") != "candidate_best_under_recorded_evidence":
+            errors.append("baseline_reference.candidate_selection.status must be candidate_best_under_recorded_evidence")
+        _required_text_list(selection.get("alternatives_considered"),
+                           "baseline_reference.candidate_selection.alternatives_considered", errors)
 
     table = payload.get("comparison_table")
     if not isinstance(table, list) or not table:
@@ -292,6 +372,76 @@ def validate_baseline_reference(root: str | Path, card: dict[str, Any]) -> dict[
     if _placeholder(payload):
         errors.append("baseline_reference contains a placeholder")
     return _result(errors, path=str(path) if path else None, reference=payload, comparison_table=table)
+
+
+def validate_compute_budget(budget: dict[str, Any], rows: list[Any]) -> dict[str, Any]:
+    """Count actual matrix executions and preserve the evidence for each estimate."""
+    errors: list[str] = []
+    for key in ("estimated_gpu_hours", "estimated_runs"):
+        if not _number(budget.get(key), positive=True, integer=key == "estimated_runs"):
+            errors.append(f"compute_budget.{key}: positive finite number required")
+    _required_text_fields(budget, "compute_budget", ("assumptions", "schedule_basis"), errors)
+    summary = budget.get("budget_summary")
+    _required_text_fields(summary, "compute_budget.budget_summary", ("gpu_type", "recommended_rental"), errors)
+    if isinstance(summary, dict):
+        for key in ("total_experiments", "required_gpu_count", "wall_clock_hours",
+                    "recommended_gpu_count", "recommended_hours"):
+            if not _number(summary.get(key), positive=True,
+                           integer=key not in {"wall_clock_hours", "recommended_hours"}):
+                errors.append(f"compute_budget.budget_summary.{key}: positive finite number required")
+        if summary.get("total_experiments") != budget.get("estimated_runs"):
+            errors.append("compute_budget.budget_summary.total_experiments must match estimated_runs")
+
+    expected = set()
+    for row in rows:
+        if isinstance(row, dict) and _text(row.get("id")) and isinstance(row.get("seeds"), list):
+            expected.update((row["id"], seed) for seed in row["seeds"] if type(seed) is int)
+    estimates = budget.get("run_estimates")
+    if not isinstance(estimates, list) or not estimates:
+        errors.append("compute_budget.run_estimates must list every matrix row and seed")
+        estimates = []
+    seen = set()
+    gpu_hours = 0.0
+    largest_run = 0
+    for index, estimate in enumerate(estimates):
+        label = f"compute_budget.run_estimates[{index}]"
+        _required_text_fields(estimate, label, ("row_id", "estimate_source"), errors)
+        if not isinstance(estimate, dict):
+            continue
+        row_id, seed = estimate.get("row_id"), estimate.get("seed")
+        if not _text(row_id) or type(seed) is not int:
+            errors.append(f"{label}: row_id and integer seed required")
+        else:
+            key = (row_id, seed)
+            if key in seen:
+                errors.append(f"{label}: duplicate row/seed estimate")
+            seen.add(key)
+        if not _number(estimate.get("gpu_count"), positive=True, integer=True) or not _number(estimate.get("hours"), positive=True):
+            errors.append(f"{label}: positive gpu_count and hours required")
+        else:
+            gpu_hours += estimate["gpu_count"] * estimate["hours"]
+            largest_run = max(largest_run, estimate["gpu_count"])
+    if expected != seen:
+        errors.append("compute_budget.run_estimates must match experiment_matrix rows and seeds exactly")
+    if budget.get("estimated_runs") != len(expected):
+        errors.append("compute_budget.estimated_runs must equal the matrix execution count (including seeds)")
+    if _number(budget.get("estimated_gpu_hours"), positive=True) and not math.isclose(budget["estimated_gpu_hours"], gpu_hours, rel_tol=1e-6):
+        errors.append("compute_budget.estimated_gpu_hours must equal the sum of per-run GPU-hours")
+    if isinstance(summary, dict):
+        for count_key, hours_key in (("required_gpu_count", "wall_clock_hours"),
+                                     ("recommended_gpu_count", "recommended_hours")):
+            count, hours = summary.get(count_key), summary.get(hours_key)
+            if _number(count, positive=True, integer=True) and _number(hours, positive=True):
+                if count < largest_run or count * hours + 1e-6 < gpu_hours:
+                    errors.append(f"compute_budget.budget_summary.{count_key}/{hours_key} cannot cover the declared runs")
+    if _placeholder(budget):
+        errors.append("compute_budget contains a placeholder")
+    display = None
+    if not errors:
+        display = (f"共有 {summary['total_experiments']:g} 个实验需要跑；"
+                   f"需要 {summary['required_gpu_count']:g} 张 {summary['gpu_type']} 跑 {summary['wall_clock_hours']:g} 小时；"
+                   f"推荐租 {summary['recommended_gpu_count']:g} 张 {summary['gpu_type']}，运行 {summary['recommended_hours']:g} 小时。")
+    return _result(errors, budget=budget, summary_text=display)
 
 
 def validate_innovation_package(root: str | Path, card: dict[str, Any]) -> dict[str, Any]:
@@ -323,14 +473,6 @@ def validate_innovation_package(root: str | Path, card: dict[str, Any]) -> dict[
                 or (head.startswith(b"RIFF") and head[8:12] == b"WEBP")):
             errors.append("architecture_draft must be a PNG, JPEG, or WebP raster for human review")
     budget = _json(paths["compute_budget"], "compute_budget", errors)
-    if budget is not None:
-        for key in ("estimated_gpu_hours", "estimated_runs"):
-            if not _number(budget.get(key), positive=True, integer=key == "estimated_runs"):
-                errors.append(f"compute_budget.{key}: positive finite {'integer' if key == 'estimated_runs' else 'number'} required")
-        if not _text(budget.get("assumptions")):
-            errors.append("compute_budget.assumptions is required")
-        if _placeholder(budget):
-            errors.append("compute_budget contains a placeholder")
     matrix = _json(paths["experiment_matrix"], "experiment_matrix", errors)
     rows = matrix.get("rows") if matrix is not None else None
     if not isinstance(rows, list) or not rows:
@@ -355,8 +497,8 @@ def validate_innovation_package(root: str | Path, card: dict[str, Any]) -> dict[
             errors.append(f"experiment_matrix row {index}: strategy_role must be one of {sorted(MATRIX_STRATEGY_ROLES)}")
         elif role == "reference_reproduction" and row.get("stage") != "baseline":
             errors.append(f"experiment_matrix row {index}: reference_reproduction must run at baseline stage")
-        elif role == "recent_extension" and row.get("stage") == "baseline":
-            errors.append(f"experiment_matrix row {index}: recent_extension must follow baseline reproduction")
+        elif role == "recent_optimization" and row.get("stage") == "baseline":
+            errors.append(f"experiment_matrix row {index}: recent_optimization must follow baseline reproduction")
         if category == "ablation" and not _text(row.get("component")):
             errors.append(f"experiment_matrix ablation row {index} needs component")
         row_id = row.get("id")
@@ -386,17 +528,21 @@ def validate_innovation_package(root: str | Path, card: dict[str, Any]) -> dict[
         if category not in categories:
             errors.append(f"experiment_matrix needs at least one {category} row")
     roles = {row.get("strategy_role") for row in rows if isinstance(row, dict)}
-    for role in ("reference_reproduction", "recent_extension"):
+    for role in ("reference_reproduction", "recent_optimization"):
         if role not in roles:
             errors.append(f"experiment_matrix needs a {role} row")
     if matrix is not None and _placeholder(matrix):
         errors.append("experiment_matrix contains a placeholder")
+    budget_result = validate_compute_budget(budget, rows) if budget is not None else None
+    if budget_result is not None:
+        errors.extend(budget_result["errors"])
     return _result(
         errors,
         paths={key: str(path) if path else None for key, path in paths.items()},
         hashes=hashes,
         matrix_rows=rows,
         baseline_reference=baseline,
+        compute_budget=budget_result,
     )
 
 
@@ -428,7 +574,7 @@ def validate_innovation_review(root: str | Path, card: dict[str, Any]) -> dict[s
     if payload is not None:
         _approval(payload, "innovation", errors, edited=True)
         for field in ("baseline_eligibility_checked", "reference_reproduction_checked",
-                      "recent_extension_checked", "protocol_comparison_checked"):
+                      "recent_optimization_checked", "protocol_comparison_checked"):
             if payload.get(field) is not True:
                 errors.append(f"innovation: {field}=true is required in the first human review")
         reference = package["baseline_reference"].get("reference") or {}

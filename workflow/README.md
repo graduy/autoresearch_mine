@@ -23,9 +23,11 @@ structured comparison table against the final scheme, an estimated compute
 budget, a source-grounded architecture specification and reviewable raster
 draft, and an experiment matrix with both `verification` and `ablation` rows.
 Its core strategy is reference-first reproduction: reproduce the paper's
-baseline and protocol, then introduce one recent method as a controlled
-extension. It does not start by claiming a new architecture, and it does not
-guarantee publication.
+baseline and protocol, then select several complementary methods from a custom
+two-year scope covering at least three CV venues, three machine-learning
+venues, and the local code library. Combine them into one coherent whole-system
+candidate and record every changed component. It does not claim a global
+optimum or guarantee publication.
 The comparison table is included in the first human-review payload. The next
 two states are separate human gates. The innovation review records the human
 edit, reviewed file hashes and source user message. The compute allocation records exact GPU,
@@ -62,3 +64,7 @@ The full contract and JSON records are in
 `labctl storage bind-card` receive this mode automatically. Existing cards are
 listed in `config/research_policy.json` as historical compatibility records;
 they are not retroactively presented as having passed the new gates.
+
+The default three-CV/three-ML discovery scope is in
+`config/research_sources.json`; topic cards may customize it with a recorded
+basis and local implementation paths.
