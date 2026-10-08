@@ -88,7 +88,7 @@ def state(root: str | Path, experiment_id: str) -> dict[str, Any]:
     root = Path(root).resolve()
     card = _card(root, experiment_id)
     project = _project(root)
-    ledger = Ledger(root / project["ledger_path"])
+    ledger = Ledger(root / project["ledger_path"], read_only=True)
     runs = ledger.runs(experiment_id)
     reference_runs = ledger.runs(card["reference_experiment_id"]) if card.get("reference_experiment_id") else []
     approval = ledger.latest_approval(experiment_id)

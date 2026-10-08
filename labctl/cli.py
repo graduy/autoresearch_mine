@@ -14,7 +14,7 @@ from .report import draft_report
 from .figures import write_figures
 from .runner import archive_experiment, card_path, project_config, run_stage
 from .workflow import state as workflow_state, validate_ingest
-from .output_protocol import checkpoint_status
+from .output_protocol import checkpoint_status, save_checkpoint
 from .storage import (
     add_code, add_reference, audit as storage_audit, bind_card, capture_asset,
     confirm_task, init_workspace, new_task, sync_experiment, workspace_root,
@@ -137,6 +137,9 @@ def build_parser() -> argparse.ArgumentParser:
     storage_audit_command.add_argument("--task")
     storage_status_command = storage_sub.add_parser("status")
     storage_status_command.add_argument("--task", required=True)
+    storage_checkpoint_command = storage_sub.add_parser("checkpoint")
+    storage_checkpoint_command.add_argument("--task", required=True)
+    storage_checkpoint_command.add_argument("--stage", required=True)
     sync = storage_sub.add_parser("sync-run")
     sync.add_argument("--experiment", required=True)
     return parser
@@ -146,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     root = _root()
     project = project_config(root)
-    ledger = Ledger(root / project["ledger_path"])
+    ledger = Ledger(root / project["ledger_path"], read_only=args.command in {"workflow", "storage", "pipeline", "ledger"})
     if args.command == "card":
         card = load_card(args.card)
         print(json.dumps({"valid": True, "experiment_id": card["experiment_id"]}, ensure_ascii=False))
@@ -259,6 +262,9 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.storage_command == "status":
             print(json.dumps(checkpoint_status(archive_root, args.task, root), ensure_ascii=False, indent=2))
+            return 0
+        if args.storage_command == "checkpoint":
+            print(save_checkpoint(archive_root, args.task, root, args.stage))
             return 0
         if args.storage_command == "sync-run":
             print(sync_experiment(archive_root, root, args.experiment))

@@ -9,140 +9,296 @@
       "id": "literature_scan",
       "label": "文献检索",
       "outputs": [
-        {"path": "manifests/references.json", "kind": "json_records"},
-        {"path": "reference/metadata", "kind": "dir_nonempty"}
+        {
+          "path": "manifests/references.json",
+          "kind": "json_records"
+        },
+        {
+          "path": "reference/metadata",
+          "kind": "dir_nonempty"
+        }
       ],
       "next_action": "补齐来源登记、阅读深度和本地文件哈希。"
     },
     {
       "id": "relevance_screen",
       "label": "相关性筛选",
-      "outputs": [{"path": "plans/relevance_screen.json", "kind": "file"}],
+      "outputs": [
+        {
+          "path": "plans/relevance_screen.json",
+          "kind": "json_records"
+        }
+      ],
       "next_action": "输出参考论文、近两年 CV/ML venue 范围和本地代码候选。"
     },
     {
       "id": "innovation_package",
       "label": "创新方案包",
       "outputs": [
-        {"path": "plans/literature_synthesis.md", "kind": "file"},
-        {"path": "plans/innovation_proposal.md", "kind": "file"},
-        {"path": "plans/compute_budget.json", "kind": "file"},
-        {"path": "plans/experiment_matrix.json", "kind": "file"},
-        {"path": "plans/baseline_reference.json", "kind": "file"},
-        {"path": "figures/architecture_spec.md", "kind": "file"},
-        {"path": "figures/drafts/architecture_draft.png", "kind": "file"}
+        {
+          "path": "plans/literature_synthesis.md",
+          "kind": "file"
+        },
+        {
+          "path": "plans/innovation_proposal.md",
+          "kind": "file"
+        },
+        {
+          "path": "plans/compute_budget.json",
+          "kind": "json"
+        },
+        {
+          "path": "plans/experiment_matrix.json",
+          "kind": "json"
+        },
+        {
+          "path": "plans/baseline_reference.json",
+          "kind": "json"
+        },
+        {
+          "path": "figures/architecture_spec.md",
+          "kind": "file"
+        },
+        {
+          "path": "figures/drafts/architecture_draft.png",
+          "kind": "file"
+        }
       ],
-      "next_action": "完成整体方案、架构图、验证/消融矩阵和逐实验预算。"
-    },
-    {
-      "id": "human_innovation_review",
-      "label": "人工审核创新包",
-      "outputs": [{"path": "approvals/innovation_review.json", "kind": "file"}],
-      "next_action": "等待用户审核 baseline、方案表格、创新方向、架构图和预算。"
-    },
-    {
-      "id": "human_compute_allocation",
-      "label": "人工分配算力",
-      "outputs": [{"path": "approvals/compute_allocation.json", "kind": "file"}],
-      "next_action": "等待用户给出 GPU 型号、张数、小时数、显存和费用上限。"
+      "next_action": "完成整体方案、架构图、验证/消融矩阵和逐实验预算。",
+      "validator": "innovation_package"
     },
     {
       "id": "experiment_card",
       "label": "实验卡登记",
       "outputs": [
-        {"path": "manifests/experiments.json", "kind": "json_records"},
-        {"path": "experiments/cards/*.json", "kind": "glob_nonempty"}
+        {
+          "path": "manifests/experiments.json",
+          "kind": "json_records"
+        },
+        {
+          "path": "experiments/cards/*.json",
+          "kind": "glob_nonempty"
+        }
       ],
-      "next_action": "绑定已审核方案、代码快照、评估器、数据清单和实验阶段。"
+      "next_action": "绑定已审核方案、代码快照、评估器、数据清单和实验阶段。",
+      "validator": "cards"
+    },
+    {
+      "id": "human_innovation_review",
+      "label": "人工审核创新包",
+      "outputs": [
+        {
+          "path": "approvals/innovation_review.json",
+          "kind": "json"
+        }
+      ],
+      "next_action": "等待用户审核 baseline、方案表格、创新方向、架构图和预算。",
+      "validator": "innovation_review"
+    },
+    {
+      "id": "human_compute_allocation",
+      "label": "人工分配算力",
+      "outputs": [
+        {
+          "path": "approvals/compute_allocation.json",
+          "kind": "json"
+        }
+      ],
+      "next_action": "等待用户给出 GPU 型号、张数、小时数、显存和费用上限。",
+      "validator": "compute_allocation"
     },
     {
       "id": "human_approval",
       "label": "人工批准执行",
-      "outputs": [{"path": "approvals/direction-budget-*.json", "kind": "glob_nonempty"}],
-      "next_action": "只有用户直接批准后才能进入服务器或训练步骤。"
+      "outputs": [
+        {
+          "path": "approvals/direction-budget-*.json",
+          "kind": "glob_nonempty"
+        }
+      ],
+      "next_action": "只有用户直接批准后才能进入服务器或训练步骤。",
+      "validator": "approval"
     },
     {
       "id": "provision_server",
       "label": "服务器生命周期记录",
-      "outputs": [{"path": "result/training_records/{experiment_id}-server.json", "kind": "file"}],
+      "outputs": [
+        {
+          "path": "result/training_records/{experiment_id}-server.json",
+          "kind": "json"
+        }
+      ],
       "next_action": "记录本地或远程资源生命周期；没有真实租用证据时不得写成已租用。"
     },
     {
       "id": "baseline",
       "label": "参考 baseline 复现",
-      "outputs": [{"path": "runs/{experiment_id}/baseline/*/integrity_receipt.json", "kind": "glob_nonempty"}],
-      "next_action": "先按参考论文协议完成 baseline，并保存日志、指标和完整性回执。"
+      "outputs": [
+        {
+          "path": "runs/{experiment_id}/baseline/*/integrity_receipt.json",
+          "kind": "glob_nonempty"
+        },
+        {
+          "path": "result/training_records/{experiment_id}.json",
+          "kind": "json"
+        }
+      ],
+      "next_action": "先按参考论文协议完成 baseline，并保存日志、指标和完整性回执。",
+      "card_stage": "baseline",
+      "validator": "runs"
     },
     {
       "id": "code_patch",
       "label": "代码版本冻结",
-      "outputs": [{"path": "manifests/code.json", "kind": "json_records"}],
-      "next_action": "登记实际执行的代码提交和不可覆盖快照。"
+      "outputs": [
+        {
+          "path": "manifests/code.json",
+          "kind": "json_records"
+        }
+      ],
+      "next_action": "登记实际执行的代码提交和不可覆盖快照。",
+      "validator": "code"
     },
     {
       "id": "pilot",
       "label": "整体方案 pilot",
       "card_stage": "pilot",
-      "outputs": [{"path": "runs/{experiment_id}/pilot/*/integrity_receipt.json", "kind": "glob_nonempty"}],
-      "next_action": "运行整体方案的筛选实验，不把 pilot 结果直接写成论文结论。"
+      "outputs": [
+        {
+          "path": "runs/{experiment_id}/pilot/*/integrity_receipt.json",
+          "kind": "glob_nonempty"
+        },
+        {
+          "path": "result/training_records/{experiment_id}.json",
+          "kind": "json"
+        }
+      ],
+      "next_action": "运行整体方案的筛选实验，不把 pilot 结果直接写成论文结论。",
+      "validator": "runs"
     },
     {
       "id": "full",
       "label": "整体方案 full",
       "card_stage": "full",
-      "outputs": [{"path": "runs/{experiment_id}/full/*/integrity_receipt.json", "kind": "glob_nonempty"}],
-      "next_action": "对通过 pilot 的候选执行完整预算实验。"
+      "outputs": [
+        {
+          "path": "runs/{experiment_id}/full/*/integrity_receipt.json",
+          "kind": "glob_nonempty"
+        },
+        {
+          "path": "result/training_records/{experiment_id}.json",
+          "kind": "json"
+        }
+      ],
+      "next_action": "对通过 pilot 的候选执行完整预算实验。",
+      "validator": "runs"
     },
     {
       "id": "multi_seed",
       "label": "多种子稳定性",
       "card_stage": "multi_seed",
-      "outputs": [{"path": "runs/{experiment_id}/multi_seed/*/integrity_receipt.json", "kind": "glob_nonempty"}],
-      "next_action": "记录稳定性证据；不要求每个种子都超过最佳种子。"
+      "outputs": [
+        {
+          "path": "runs/{experiment_id}/multi_seed/*/integrity_receipt.json",
+          "kind": "glob_nonempty"
+        },
+        {
+          "path": "result/training_records/{experiment_id}.json",
+          "kind": "json"
+        }
+      ],
+      "next_action": "记录稳定性证据；不要求每个种子都超过最佳种子。",
+      "validator": "runs"
     },
     {
       "id": "analysis",
       "label": "统计分析",
       "outputs": [
-        {"path": "result/training_records/{experiment_id}.json", "kind": "file"},
-        {"path": "result/evaluations/{experiment_id}-analysis.json", "kind": "file"}
+        {
+          "path": "result/training_records/{experiment_id}.json",
+          "kind": "json"
+        },
+        {
+          "path": "result/evaluations/{experiment_id}-analysis.json",
+          "kind": "json"
+        }
       ],
-      "next_action": "从冻结日志生成统计分析、误差边界和证据清单。"
+      "next_action": "从冻结日志生成统计分析、误差边界和证据清单。",
+      "checkpoint_required": true
     },
     {
       "id": "conclusion_review",
       "label": "人工审核结论",
-      "outputs": [{"path": "approvals/conclusion_review.json", "kind": "file"}],
-      "next_action": "人工核对证据后写入准确的中英文结论和 run 引用。"
+      "outputs": [
+        {
+          "path": "approvals/conclusion_review.json",
+          "kind": "json"
+        }
+      ],
+      "next_action": "人工核对证据后写入准确的中英文结论和 run 引用。",
+      "validator": "conclusion_review"
     },
     {
       "id": "paper_draft",
       "label": "论文初稿",
       "outputs": [
-        {"path": "paper/zh/{task_id}-draft-v*.md", "kind": "glob_nonempty"},
-        {"path": "paper/en/{task_id}-draft-v*.md", "kind": "glob_nonempty"}
+        {
+          "path": "paper/zh/{task_id}-draft-v*.md",
+          "kind": "glob_nonempty"
+        },
+        {
+          "path": "paper/en/{task_id}-draft-v*.md",
+          "kind": "glob_nonempty"
+        }
       ],
-      "next_action": "只使用人工审核通过的结论生成中文和英文初稿。"
+      "next_action": "只使用人工审核通过的结论生成中文和英文初稿。",
+      "checkpoint_required": true
     },
     {
       "id": "report_draft",
       "label": "汇报材料",
       "outputs": [
-        {"path": "reports/{task_id}-report-v*.md", "kind": "glob_nonempty"},
-        {"path": "ppt/briefs/{task_id}-brief-v*.md", "kind": "glob_nonempty"}
+        {
+          "path": "reports/{task_id}-report-v*.md",
+          "kind": "glob_nonempty"
+        },
+        {
+          "path": "ppt/briefs/{task_id}-brief-v*.md",
+          "kind": "glob_nonempty"
+        },
+        {
+          "path": "ppt/source/{task_id}-v*.pptx",
+          "kind": "glob_nonempty"
+        },
+        {
+          "path": "figures/exports/{task_id}-architecture-v*.png",
+          "kind": "glob_nonempty"
+        }
       ],
-      "next_action": "生成基于同一证据清单的阶段报告和 PPT 提纲。"
+      "next_action": "用审核结论与真实数据完成报告、架构图和可编辑 PPTX，不只交付提纲。",
+      "checkpoint_required": true
     },
     {
       "id": "archive",
       "label": "归档",
-      "outputs": [{"path": "archive/archive_manifest.json", "kind": "file"}],
-      "next_action": "保存卡片、代码提交、环境、日志、回执和交付物哈希。"
+      "outputs": [
+        {
+          "path": "archive/archive_manifest.json",
+          "kind": "json"
+        }
+      ],
+      "next_action": "保存卡片、代码提交、环境、日志、回执和交付物哈希。",
+      "checkpoint_required": true
     },
     {
       "id": "cleanup",
       "label": "清理回执",
-      "outputs": [{"path": "manifests/cleanup_receipt.json", "kind": "file"}],
+      "outputs": [
+        {
+          "path": "manifests/cleanup_receipt.json",
+          "kind": "json"
+        }
+      ],
       "next_action": "仅清理明确授权的临时文件，并记录清理范围和时间。"
     }
   ]

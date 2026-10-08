@@ -3,8 +3,8 @@
 For new managed work, the control-plane state machine is:
 
 ```text
-literature_scan -> innovation_package -> human_innovation_review
--> human_compute_allocation -> human_approval
+literature_scan -> relevance_screen -> innovation_package -> experiment_card
+-> human_innovation_review -> human_compute_allocation -> human_approval
 -> baseline -> pilot -> full -> multi_seed -> analysis
 -> conclusion_review -> paper_draft -> archive -> cleanup
 ```
@@ -77,4 +77,6 @@ per task rather than fixed to RTX 4060.
 The fixed-output checkpoint contract is in `workflow/OUTPUT_PROTOCOL.md` and
 `workflow/output_protocol.json`. A new agent resumes with
 `labctl storage status --task <task-id>`; it continues from the first incomplete
-output and leaves later stages untouched.
+output and leaves later stages untouched. After a stage is fully validated, it
+seals the hash-bound checkpoint with
+`labctl storage checkpoint --task <task-id> --stage <stage-id>`.

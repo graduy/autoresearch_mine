@@ -59,13 +59,23 @@ CREATE TABLE IF NOT EXISTS events (
 
 
 class Ledger:
-    def __init__(self, path: str | Path):
+    def __init__(self, path: str | Path, *, read_only: bool = False):
         self.path = Path(path)
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self._init()
+        self.read_only = read_only
+        if not read_only:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            self._init()
 
     def _connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(self.path)
+        if self.read_only and self.path.is_file():
+            connection = sqlite3.connect(self.path.resolve().as_uri() + "?mode=ro", uri=True)
+        elif self.read_only:
+            # A status query before the first run must not create a ledger.
+            connection = sqlite3.connect(":memory:")
+            connection.executescript(SCHEMA)
+            connection.execute("PRAGMA query_only=ON")
+        else:
+            connection = sqlite3.connect(self.path)
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA busy_timeout=10000")
         return connection

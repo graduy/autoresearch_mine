@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from labctl.storage import add_code, add_reference, audit, bind_card, init_workspace, new_task
-from labctl.output_protocol import checkpoint_status
+from labctl.output_protocol import checkpoint_status, save_checkpoint
 
 
 def _git_repo(tmp_path: Path) -> Path:
@@ -51,6 +51,34 @@ def test_storage_registers_references_and_immutable_code(tmp_path):
     assert report["passed"] is False
     assert any("code file missing or changed" in error for error in report["errors"])
     assert any("uncommitted code edits" in warning for warning in report["warnings"])
+
+
+def test_checkpoint_is_saved_only_after_valid_outputs(tmp_path):
+    lab = Path(__file__).parents[1]
+    root = tmp_path / "forautoresearch"
+    init_workspace(root, lab)
+    task = new_task(root, "Checkpoint task", "checkpoint-task")
+    (task / "manifests/output_protocol.json").write_text(json.dumps({
+        "protocol_id": "forautoresearch-task-output-v1",
+        "stages": [{
+            "id": "analysis", "label": "统计分析",
+            "outputs": [{"path": "result/evaluations/analysis.json", "kind": "json"}],
+            "next_action": "保存断点", "checkpoint_required": True,
+        }],
+    }), encoding="utf-8")
+    before = checkpoint_status(root, task.name, lab)
+    assert before["current_stage"] == "analysis"
+    assert before["stages"][0]["outputs_ready"] is False
+    with pytest.raises(ValueError, match="complete and validate"):
+        save_checkpoint(root, task.name, lab, "analysis")
+
+    output = task / "result/evaluations/analysis.json"
+    output.write_text(json.dumps({"metric": 1.0}), encoding="utf-8")
+    prepared = checkpoint_status(root, task.name, lab)
+    assert prepared["stages"][0]["outputs_ready"] is True
+    checkpoint = save_checkpoint(root, task.name, lab, "analysis")
+    assert checkpoint.is_file()
+    assert checkpoint_status(root, task.name, lab)["current_stage"] == "complete"
 
 
 def test_code_snapshot_rejects_weights_and_datasets(tmp_path):

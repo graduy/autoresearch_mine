@@ -8,6 +8,15 @@ PYTHONPATH=. python3 -m labctl storage status --task AR-YYYYMMDD-NNN-slug
 
 返回的 `current_stage` 是第一个缺少固定产出的阶段；agent 只能补这个阶段及其前置缺口，不能因为后面的目录或文件已经存在就跳步。`completed_stages` 是已完成检查点，`skipped_stages` 只表示实验卡没有声明可选阶段，不表示阶段被绕过。
 
+阶段输出通过后，需要显式封存哈希断点：
+
+```bash
+PYTHONPATH=. python3 -m labctl storage checkpoint --task <task-id> --stage <stage-id>
+```
+
+该命令只接受当前阶段及其前置阶段均已验证的输出，并把输出哈希写入
+`manifests/checkpoints/<stage-id>.json`。后续文件或上游产出发生变化时，状态会重新回到对应阶段；保存新版本前会把旧 checkpoint 放入 `manifests/checkpoints/history/`。
+
 课题输出根目录固定为 `/home/grady/forautoresearch/tasks/<task-id>/`：
 
 | 阶段 | 固定产出 | 完成条件 |
@@ -15,9 +24,9 @@ PYTHONPATH=. python3 -m labctl storage status --task AR-YYYYMMDD-NNN-slug
 | `literature_scan` | `manifests/references.json`、`reference/metadata/` | 有登记记录和来源元数据 |
 | `relevance_screen` | `plans/relevance_screen.json` | 有 baseline、近两年 venue 范围、本地代码候选和筛选结论 |
 | `innovation_package` | `plans/literature_synthesis.md`、`plans/innovation_proposal.md`、`plans/baseline_reference.json`、`plans/compute_budget.json`、`plans/experiment_matrix.json`、`figures/architecture_spec.md`、`figures/drafts/architecture_draft.png` | 研究包完整且通过机器校验 |
+| `experiment_card` | `manifests/experiments.json`、`experiments/cards/<experiment>.json` | 实验卡绑定代码和研究包 |
 | `human_innovation_review` | `approvals/innovation_review.json` | 用户人工编辑、审核并绑定当前文件哈希 |
 | `human_compute_allocation` | `approvals/compute_allocation.json` | 用户给出 GPU、张数、小时、显存、运行次数和费用上限 |
-| `experiment_card` | `manifests/experiments.json`、`experiments/cards/<experiment>.json` | 实验卡绑定代码和研究包 |
 | `human_approval` | `approvals/direction-budget-<hash>.json` | 用户直接批准执行 |
 | `provision_server` | `result/training_records/<experiment>-server.json` | 只记录真实服务器生命周期，不能把计划写成已租用 |
 | `baseline` | `runs/<experiment>/baseline/<run-id>/integrity_receipt.json` | 参考论文 baseline 完成并有完整性回执 |

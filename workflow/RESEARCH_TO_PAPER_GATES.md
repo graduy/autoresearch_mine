@@ -14,7 +14,9 @@ output; later files never authorize skipping an earlier stage.
 
 ```text
 literature_scan
+  -> relevance_screen
   -> innovation_package
+  -> experiment_card
   -> human_innovation_review
   -> human_compute_allocation
   -> human_approval

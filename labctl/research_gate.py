@@ -610,7 +610,7 @@ def validate_compute_allocation(root: str | Path, card: dict[str, Any]) -> dict[
 
 
 def _ledger(root: Path) -> Ledger:
-    return Ledger(root / read_json(root / "config/project.json")["ledger_path"])
+    return Ledger(root / read_json(root / "config/project.json")["ledger_path"], read_only=True)
 
 
 def matrix_progress(root: str | Path, card: dict[str, Any]) -> dict[str, Any]:
