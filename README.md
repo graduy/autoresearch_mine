@@ -19,9 +19,12 @@ metric, timeout, artifact capture, acceptance rule, and stop conditions.
   multi-seed evidence, and an independent test when the project has one.
 - Missing evidence becomes `TBD`; the report generator never invents metrics.
 - New managed cards use a human-gated research-to-paper workflow: the
-  innovation direction, compute estimate, architecture draft and
-  verification/ablation matrix are edited and approved before training; exact
-  resources are supplied by the human reviewer.
+  eligible SCI/SCIE journal baseline paper in Chinese Academy of Sciences
+  major-category 1 or 2 (impact factor > 4), its baseline and
+  experiment scheme, the final-scheme comparison table, innovation direction,
+  compute estimate, architecture draft and verification/ablation matrix are
+  shown for human review before training; exact resources are supplied by the
+  human reviewer.
 - After experiments, the human reviewer checks the evidence snapshot and
   approves the conclusion wording before the Chinese and English first drafts
   are generated.

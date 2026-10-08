@@ -84,6 +84,7 @@ def test_new_bound_cards_receive_research_to_paper_contract(tmp_path):
     assert set(payload["research_package"]) == {
         "literature_synthesis", "innovation_proposal", "compute_budget",
         "experiment_matrix", "architecture_spec", "architecture_draft",
+        "baseline_reference",
     }
     assert all(Path(value).is_absolute() for value in payload["research_package"].values())
     assert set(payload["human_reviews"]) == {"innovation", "compute", "conclusion"}

@@ -139,7 +139,7 @@ def new_task(root: Path, title: str, slug: str, status: str = "proposed") -> Pat
             "- paper/zh 与 paper/en：中文版、英文版可编辑初稿及导出件。\n"
             "- figures/ 与 ppt/：草图、批准稿、可编辑源文件和导出件。\n"
             "- approvals/、manifests/、archive/：人工批准、哈希清单、历史归档。\n\n"
-            "先提交 plans/innovation_proposal.md 与 plans/compute_budget.json，等待用户明确批准。\n",
+            "先提交 plans/baseline_reference.json、plans/innovation_proposal.md 与 plans/compute_budget.json，等待用户明确批准。\n",
             encoding="utf-8")
         for name in ("references", "code", "experiments", "assets"):
             write_json(target / f"manifests/{name}.json", {"records": []})
@@ -288,6 +288,7 @@ def bind_card(root: Path, lab: Path, task_id: str, card_file: str | Path, code_i
                 "experiment_matrix": str(target / "plans/experiment_matrix.json"),
                 "architecture_spec": str(target / "figures/architecture_spec.md"),
                 "architecture_draft": str(target / "figures/drafts/architecture_draft.png"),
+                "baseline_reference": str(target / "plans/baseline_reference.json"),
             },
             human_reviews={
                 "innovation": str(target / "approvals/innovation_review.json"),

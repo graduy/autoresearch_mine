@@ -19,8 +19,14 @@ HUMAN_GATED_WORKFLOW = "human_gated_research_to_paper"
 PACKAGE_FIELDS = (
     "literature_synthesis", "innovation_proposal", "compute_budget",
     "experiment_matrix", "architecture_spec", "architecture_draft",
+    "baseline_reference",
 )
 REVIEW_FIELDS = ("innovation", "compute", "conclusion")
+BASELINE_QUARTILES = {"CAS": {"1", "2"}}
+BASELINE_COMPARISON_KEYS = {
+    "model_baseline", "data_split", "training_protocol",
+    "evaluation_metrics", "ablation_protocol",
+}
 WAITING_STATES = {
     "innovation_package", "human_innovation_review", "human_compute_allocation",
     "human_approval", "blocked", "candidate_rejected", "experiment_matrix",
@@ -111,6 +117,159 @@ def _result(errors: list[str], **extra: Any) -> dict[str, Any]:
     return {"valid": not errors, "errors": errors, **extra}
 
 
+def _required_text_fields(value: Any, label: str, fields: tuple[str, ...], errors: list[str]) -> None:
+    if not isinstance(value, dict):
+        errors.append(f"{label} must be an object")
+        return
+    for field in fields:
+        if not _text(value.get(field)):
+            errors.append(f"{label}.{field} is required")
+
+
+def _required_text_list(value: Any, label: str, errors: list[str]) -> None:
+    if not isinstance(value, list) or not value or not all(_text(item) for item in value):
+        errors.append(f"{label} must be a non-empty list of text values")
+
+
+def _valid_year(value: Any) -> bool:
+    return type(value) is int and 1900 <= value <= datetime.now().year
+
+
+def _valid_timestamp(value: Any) -> bool:
+    if not _text(value):
+        return False
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).tzinfo is not None
+    except ValueError:
+        return False
+
+
+def validate_baseline_reference(root: str | Path, card: dict[str, Any]) -> dict[str, Any]:
+    """Validate the reference paper shown at the first human-review gate.
+
+    Journals require a source-backed SCI/SCIE 1/2 ranking and JIF > 4.
+    Conferences use peer-review and standing evidence instead of journal
+    metrics, with venue quality confirmed in the same human review. This
+    validates provenance declarations, not the external sources themselves.
+    """
+    root = Path(root).resolve()
+    path = package_paths(root, card)["baseline_reference"]
+    errors: list[str] = []
+    payload = _json(path, "baseline_reference", errors)
+    if payload is None:
+        return _result(errors, path=str(path) if path else None, reference=None, comparison_table=[])
+
+    paper = payload.get("paper")
+    _required_text_fields(
+        paper, "baseline_reference.paper",
+        ("title", "venue", "venue_type", "publication_source", "full_text_source", "verified_at"), errors,
+    )
+    if isinstance(paper, dict):
+        if not _valid_year(paper.get("year")):
+            errors.append("baseline_reference.paper.year must be a valid publication year")
+        if not _valid_timestamp(paper.get("verified_at")):
+            errors.append("baseline_reference.paper.verified_at needs ISO-8601 with a timezone")
+        if not (_text(paper.get("doi")) or _text(paper.get("url"))):
+            errors.append("baseline_reference.paper needs doi or url")
+        venue_type = paper.get("venue_type")
+        if venue_type == "journal":
+            _required_text_fields(paper, "baseline_reference.paper", (
+                "indexing_source", "quartile_system", "quartile_category", "quartile_source",
+                "impact_factor_source",
+            ), errors)
+            if paper.get("indexing") not in ("SCI", "SCIE"):
+                errors.append("baseline_reference.paper.indexing must be SCI or SCIE")
+            system = paper.get("quartile_system")
+            if system != "CAS":
+                errors.append("baseline_reference.paper.quartile_system must be CAS")
+            elif paper.get("sci_quartile") not in tuple(BASELINE_QUARTILES[system]):
+                errors.append("baseline_reference.paper.sci_quartile must be CAS major-category 1 or 2")
+            if system == "CAS" and paper.get("quartile_scope") != "major":
+                errors.append("baseline_reference.paper.quartile_scope must be major for CAS")
+            for key in ("quartile_year", "impact_factor_year"):
+                if not _valid_year(paper.get(key)):
+                    errors.append(f"baseline_reference.paper.{key} must identify the metric year")
+            impact_factor = paper.get("impact_factor")
+            if not _number(impact_factor, positive=True) or impact_factor <= 4:
+                errors.append("baseline_reference.paper.impact_factor must be strictly greater than 4")
+        elif venue_type == "conference":
+            quality = paper.get("conference_quality")
+            _required_text_fields(quality, "baseline_reference.paper.conference_quality", (
+                "standing_basis", "standing_source", "peer_review_source", "proceedings_source",
+            ), errors)
+            if isinstance(quality, dict):
+                if quality.get("peer_reviewed") is not True:
+                    errors.append("conference reference must have verified peer review")
+                if quality.get("paper_type") not in ("full", "regular"):
+                    errors.append("conference baseline must be a full or regular paper")
+            # Do not manufacture journal quartiles or impact factors for a conference.
+            for key in ("sci_quartile", "impact_factor"):
+                if paper.get(key) is not None:
+                    errors.append(f"conference reference must leave journal field {key} absent or null")
+        else:
+            errors.append("baseline_reference.paper.venue_type must be journal or conference")
+
+    reference_baseline = payload.get("reference_baseline")
+    _required_text_fields(
+        reference_baseline, "baseline_reference.reference_baseline",
+        ("name", "model", "input_or_sequence", "source_location"), errors,
+    )
+    if isinstance(reference_baseline, dict):
+        _required_text_list(reference_baseline.get("reported_metrics"),
+                            "baseline_reference.reference_baseline.reported_metrics", errors)
+
+    reference_scheme = payload.get("reference_experiment_scheme")
+    _required_text_fields(
+        reference_scheme, "baseline_reference.reference_experiment_scheme",
+        ("dataset", "split", "training", "evaluation", "ablation", "source_location"), errors,
+    )
+    if isinstance(reference_scheme, dict):
+        _required_text_list(reference_scheme.get("metrics"),
+                            "baseline_reference.reference_experiment_scheme.metrics", errors)
+
+    final_scheme = payload.get("final_experiment_scheme")
+    _required_text_fields(
+        final_scheme, "baseline_reference.final_experiment_scheme",
+        ("method", "dataset", "split", "training", "evaluation", "ablation_plan"), errors,
+    )
+    if isinstance(final_scheme, dict):
+        _required_text_list(final_scheme.get("metrics"),
+                            "baseline_reference.final_experiment_scheme.metrics", errors)
+        matrix_path = package_paths(root, card)["experiment_matrix"]
+        if not file_hash(matrix_path) or final_scheme.get("experiment_matrix_sha256") != file_hash(matrix_path):
+            errors.append("baseline_reference.final_experiment_scheme must bind the current experiment_matrix_sha256")
+        if card.get("primary_metric") not in (final_scheme.get("metrics") or []):
+            errors.append("baseline_reference.final_experiment_scheme.metrics must include the card primary_metric")
+
+    table = payload.get("comparison_table")
+    if not isinstance(table, list) or not table:
+        errors.append("baseline_reference.comparison_table must be a non-empty table")
+        table = []
+    seen_keys: set[str] = set()
+    for index, row in enumerate(table):
+        if not isinstance(row, dict):
+            errors.append(f"baseline_reference.comparison_table row {index} must be an object")
+            continue
+        for field in ("dimension_key", "dimension", "reference_paper", "final_scheme", "decision_or_difference", "source_location"):
+            if not _text(row.get(field)):
+                errors.append(f"baseline_reference.comparison_table row {index} needs {field}")
+        key = row.get("dimension_key")
+        if _text(key):
+            if key not in BASELINE_COMPARISON_KEYS:
+                errors.append(f"baseline_reference.comparison_table row {index} has unsupported dimension_key: {key}")
+            if key in seen_keys:
+                errors.append(f"baseline_reference.comparison_table duplicates dimension_key: {key}")
+            seen_keys.add(key)
+        if row.get("dimension_key") == "evaluation_metrics" and not isinstance(row.get("comparable"), bool):
+            errors.append("evaluation_metrics comparison needs comparable=true/false")
+    missing_keys = sorted(BASELINE_COMPARISON_KEYS - seen_keys)
+    if missing_keys:
+        errors.append("baseline_reference.comparison_table missing dimensions: " + ", ".join(missing_keys))
+    if _placeholder(payload):
+        errors.append("baseline_reference contains a placeholder")
+    return _result(errors, path=str(path) if path else None, reference=payload, comparison_table=table)
+
+
 def validate_innovation_package(root: str | Path, card: dict[str, Any]) -> dict[str, Any]:
     root = Path(root).resolve()
     paths = package_paths(root, card)
@@ -130,6 +289,8 @@ def validate_innovation_package(root: str | Path, card: dict[str, Any]) -> dict[
                     errors.append(f"{field}: actual content is required")
             except (OSError, UnicodeDecodeError) as exc:
                 errors.append(f"{field}: unreadable text ({exc})")
+    baseline = validate_baseline_reference(root, card)
+    errors.extend(baseline["errors"])
     # Verify a supported image signature, not its scientific correctness.
     draft = paths["architecture_draft"]
     if draft and draft.is_file():
@@ -195,7 +356,13 @@ def validate_innovation_package(root: str | Path, card: dict[str, Any]) -> dict[
             errors.append(f"experiment_matrix needs at least one {category} row")
     if matrix is not None and _placeholder(matrix):
         errors.append("experiment_matrix contains a placeholder")
-    return _result(errors, paths={key: str(path) if path else None for key, path in paths.items()}, hashes=hashes, matrix_rows=rows)
+    return _result(
+        errors,
+        paths={key: str(path) if path else None for key, path in paths.items()},
+        hashes=hashes,
+        matrix_rows=rows,
+        baseline_reference=baseline,
+    )
 
 
 def _approval(payload: dict[str, Any], label: str, errors: list[str], *, edited: bool = False) -> None:
@@ -225,6 +392,12 @@ def validate_innovation_review(root: str | Path, card: dict[str, Any]) -> dict[s
     payload = _json(review_paths(root, card)["innovation"], "innovation review", errors)
     if payload is not None:
         _approval(payload, "innovation", errors, edited=True)
+        for field in ("baseline_eligibility_checked", "protocol_comparison_checked"):
+            if payload.get(field) is not True:
+                errors.append(f"innovation: {field}=true is required in the first human review")
+        reference = package["baseline_reference"].get("reference") or {}
+        if (reference.get("paper") or {}).get("venue_type") == "conference" and payload.get("conference_quality_confirmed") is not True:
+            errors.append("innovation: conference_quality_confirmed=true is required for a conference baseline")
         recorded = payload.get("package_sha256", {})
         if not isinstance(recorded, dict):
             recorded = {}
@@ -361,5 +534,6 @@ def gate_snapshot(root: str | Path, card: dict[str, Any], runs: list[dict[str, A
     innovation = allocation["innovation"]
     return {"workflow_mode": HUMAN_GATED_WORKFLOW, "enabled": True,
             "innovation_package": innovation["package"], "innovation_review": innovation,
+            "baseline_reference": innovation["package"].get("baseline_reference"),
             "compute_allocation": allocation, "experiment_matrix": conclusion["matrix"],
             "conclusion_review": conclusion}

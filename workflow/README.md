@@ -16,11 +16,15 @@ only accepted when the runner has a structured metric, a successful integrity
 receipt, and a recorded artifact directory.
 
 `innovation_package` must contain the literature synthesis, one concrete
-innovation direction, an estimated compute budget, a source-grounded
-architecture specification and reviewable raster draft, and an experiment
-matrix with both `verification` and `ablation` rows. The next two states are
-separate human gates. The innovation review records the human edit, reviewed
-file hashes and source user message. The compute allocation records exact GPU,
+innovation direction, an eligible SCI/SCIE journal baseline paper in Chinese
+Academy of Sciences major-category 1 or 2 with impact factor strictly greater
+than 4, the paper's baseline and experiment scheme, a
+structured comparison table against the final scheme, an estimated compute
+budget, a source-grounded architecture specification and reviewable raster
+draft, and an experiment matrix with both `verification` and `ablation` rows.
+The comparison table is included in the first human-review payload. The next
+two states are separate human gates. The innovation review records the human
+edit, reviewed file hashes and source user message. The compute allocation records exact GPU,
 VRAM, GPU-hour, runtime, run-count and cost limits.
 
 After the experiment stages finish, `conclusion_review` requires the human to

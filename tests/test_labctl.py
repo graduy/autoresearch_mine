@@ -37,6 +37,7 @@ def _human_gated_fixture(tmp_path: Path) -> tuple[Path, dict]:
             "experiment_matrix": "plans/gated/matrix.json",
             "architecture_spec": "plans/gated/architecture.md",
             "architecture_draft": "plans/gated/architecture.png",
+            "baseline_reference": "plans/gated/baseline_reference.json",
         },
         "human_reviews": {
             "innovation": "approvals/gated/innovation.json",
@@ -61,6 +62,62 @@ def _write_human_package(root: Path, card: dict) -> dict[str, str]:
     ]}), encoding="utf-8")
     (package / "architecture.md").write_text("Inputs -> proposed module -> evaluator", encoding="utf-8")
     (package / "architecture.png").write_bytes(b"\x89PNG\r\n\x1a\narchitecture draft")
+    (package / "baseline_reference.json").write_text(json.dumps({
+        "paper": {
+            "title": "A source-backed baseline paper",
+            "venue": "Journal of Controlled Research",
+            "venue_type": "journal",
+            "year": 2024,
+            "publication_source": "Publisher record",
+            "full_text_source": "Publisher full text",
+            "indexing": "SCIE",
+            "indexing_source": "Web of Science record",
+            "quartile_system": "CAS",
+            "quartile_scope": "major",
+            "quartile_category": "Computer Science",
+            "sci_quartile": "2",
+            "impact_factor": 5.1,
+            "doi": "10.1000/example",
+            "quartile_source": "CAS 2024 major-category record",
+            "quartile_year": 2024,
+            "impact_factor_source": "JCR 2024 record",
+            "impact_factor_year": 2024,
+            "verified_at": "2026-10-06T10:00:00+08:00",
+        },
+        "reference_baseline": {
+            "name": "Reference baseline",
+            "model": "Locked reference model",
+            "input_or_sequence": "Fixed input protocol",
+            "reported_metrics": ["score"],
+            "source_location": "paper section 3",
+        },
+        "reference_experiment_scheme": {
+            "dataset": "Reference dataset",
+            "split": "Reference train/validation/test split",
+            "training": "Reference training protocol",
+            "evaluation": "Reference evaluation protocol",
+            "metrics": ["score"],
+            "ablation": "Reference ablation protocol",
+            "source_location": "paper section 4",
+        },
+        "final_experiment_scheme": {
+            "method": "Proposed method",
+            "dataset": "Same locked dataset",
+            "split": "Same locked split",
+            "training": "Paired controlled training",
+            "evaluation": "Same evaluator",
+            "metrics": ["score"],
+            "ablation_plan": "Remove the proposed module under the same protocol",
+            "experiment_matrix_sha256": hashlib.sha256((package / "matrix.json").read_bytes()).hexdigest(),
+        },
+        "comparison_table": [
+            {"dimension_key": "model_baseline", "dimension": "Model/baseline", "reference_paper": "Locked reference model", "final_scheme": "Proposed method", "decision_or_difference": "Controlled method change", "source_location": "paper section 3; plan section 2"},
+            {"dimension_key": "data_split", "dimension": "Data and split", "reference_paper": "Reference dataset and split", "final_scheme": "Same locked dataset and split", "decision_or_difference": "Keep fixed for comparability", "source_location": "paper section 2; plan section 3"},
+            {"dimension_key": "training_protocol", "dimension": "Training protocol", "reference_paper": "Reference training protocol", "final_scheme": "Paired controlled training", "decision_or_difference": "Record changed settings", "source_location": "paper section 4; plan section 4"},
+            {"dimension_key": "evaluation_metrics", "dimension": "Evaluation metrics", "reference_paper": "score", "final_scheme": "score", "decision_or_difference": "Same primary metric", "source_location": "paper section 5; plan section 5", "comparable": True},
+            {"dimension_key": "ablation_protocol", "dimension": "Ablation protocol", "reference_paper": "Reported ablations", "final_scheme": "Remove proposed module", "decision_or_difference": "Required causal check", "source_location": "paper section 4; plan section 6"},
+        ],
+    }, ensure_ascii=False), encoding="utf-8")
     from labctl.research_gate import validate_innovation_package
     return validate_innovation_package(root, card)["hashes"]
 
@@ -73,6 +130,9 @@ def _write_innovation_review(root: Path, package_hashes: dict[str, str]) -> None
         "reviewer": "tester", "actor": "user", "reviewed_at": "2026-10-06T10:00:00+08:00",
         "source_thread_id": "test-thread", "user_quote": "I reviewed and approved the edited innovation package.",
         "edit_summary": "Adjusted the proposed module and fixed the ablation pass rule.",
+        "baseline_eligibility_checked": True,
+        "protocol_comparison_checked": True,
+        "conference_quality_confirmed": False,
         "package_sha256": package_hashes,
         "card_sha256": hashlib.sha256((root / "experiments/cards/gated-e1.json").read_bytes()).hexdigest(),
     }), encoding="utf-8")
@@ -233,6 +293,10 @@ def test_human_gated_workflow_requires_package_reviews_and_allocation(tmp_path):
 
     hashes = _write_human_package(root, card)
     assert state(root, card["experiment_id"])["state"] == "human_innovation_review"
+    first_review = state(root, card["experiment_id"])
+    baseline_review = first_review["gates"]["baseline_reference"]
+    assert baseline_review["valid"] is True
+    assert len(baseline_review["comparison_table"]) == 5
     _write_innovation_review(root, hashes)
     assert state(root, card["experiment_id"])["state"] == "human_compute_allocation"
     _write_compute_review(root)

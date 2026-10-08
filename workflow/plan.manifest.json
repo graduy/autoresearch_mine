@@ -28,6 +28,7 @@
   "hard_boundaries": [
     "human approval is required before execution or server creation",
     "new managed cards require a human-edited innovation review and a separate exact compute allocation",
+    "the first human review requires a source-backed SCI/SCIE journal baseline in Chinese Academy of Sciences major-category 1 or 2 with impact factor above 4, its baseline and experiment scheme, and a structured final-scheme comparison table; conferences use a separate peer-review and venue-standing record",
     "each innovation package contains verification and ablation rows",
     "paper conclusions require a human-reviewed evidence snapshot and exact bilingual wording",
     "prepare.py, data, evaluator, and dependencies are protected",

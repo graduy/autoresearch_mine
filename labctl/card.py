@@ -15,6 +15,7 @@ HUMAN_GATED_WORKFLOW = "human_gated_research_to_paper"
 RESEARCH_PACKAGE_FIELDS = {
     "literature_synthesis", "innovation_proposal", "compute_budget",
     "experiment_matrix", "architecture_spec", "architecture_draft",
+    "baseline_reference",
 }
 HUMAN_REVIEW_FIELDS = {"innovation", "compute", "conclusion"}
 
@@ -49,10 +50,13 @@ def load_card(path: str | Path) -> dict[str, Any]:
         package = card.get("research_package")
         if not isinstance(package, dict):
             raise ValueError("human-gated cards need a research_package object")
-        missing_package = sorted(RESEARCH_PACKAGE_FIELDS - set(package))
+        # Older managed cards remain inspectable: the runtime gate reports a
+        # missing baseline_reference as an unmet requirement and blocks runs.
+        missing_package = sorted((RESEARCH_PACKAGE_FIELDS - {"baseline_reference"}) - set(package))
         if missing_package:
             raise ValueError(f"research_package missing fields: {', '.join(missing_package)}")
-        if not all(isinstance(package[key], str) and package[key].strip() for key in RESEARCH_PACKAGE_FIELDS):
+        if not all(isinstance(package[key], str) and package[key].strip()
+                   for key in RESEARCH_PACKAGE_FIELDS if key in package):
             raise ValueError("research_package paths must be non-empty strings")
         reviews = card.get("human_reviews")
         if not isinstance(reviews, dict):

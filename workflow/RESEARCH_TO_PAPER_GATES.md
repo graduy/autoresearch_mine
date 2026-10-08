@@ -23,6 +23,16 @@ A card may omit pilot or full for a deliberately smaller experiment, but the
 remaining stages keep their order. `innovation_package` must include:
 
 - a literature synthesis and one concrete innovation direction;
+- a source-backed baseline paper record in `baseline_reference.json`. For a
+  journal, the default qualification is SCI/SCIE indexed, Chinese Academy of
+  Sciences major-category 1 or 2, and impact factor strictly greater than 4;
+  record the publication venue, year, category, metric years, ranking sources
+  and verification time;
+- the reference paper's adopted baseline and experiment scheme, plus the final
+  experiment scheme proposed for this task;
+- a comparison table with separate rows for model/baseline, data and split,
+  training protocol, evaluation metrics and ablation protocol. This table is
+  shown as part of the first `human_innovation_review` payload;
 - an estimated compute budget;
 - a source-grounded architecture specification and reviewable PNG/JPEG/WebP
   draft;
@@ -68,7 +78,8 @@ checkout can read the evidence archive in `/home/grady/forautoresearch`:
     "compute_budget": "<path>",
     "experiment_matrix": "<path>",
     "architecture_spec": "<path>",
-    "architecture_draft": "<path>"
+    "architecture_draft": "<path>",
+    "baseline_reference": "<path to baseline_reference.json>"
   },
   "human_reviews": {
     "innovation": "<path>",
@@ -77,6 +88,82 @@ checkout can read the evidence archive in `/home/grady/forautoresearch`:
   }
 }
 ```
+
+`baseline_reference.json` uses this structure. The `comparison_table` is a
+structured table so the status command can display it directly during the
+first human review:
+
+```json
+{
+  "paper": {
+    "title": "<paper title>",
+    "venue": "<journal, conference or other publication venue>",
+    "venue_type": "journal",
+    "year": 2024,
+    "publication_source": "<publisher or indexing record>",
+    "full_text_source": "<full-text source>",
+    "indexing": "SCI or SCIE",
+    "indexing_source": "<Web of Science record>",
+    "quartile_system": "CAS",
+    "quartile_scope": "major",
+    "quartile_category": "<category>",
+    "sci_quartile": "1 or 2",
+    "impact_factor": 5.2,
+    "doi": "<doi or url>",
+    "quartile_source": "<CAS source>",
+    "quartile_year": 2024,
+    "impact_factor_source": "<JCR source>",
+    "impact_factor_year": 2024,
+    "verified_at": "<ISO-8601 with timezone>"
+  },
+  "reference_baseline": {
+    "name": "<baseline name>",
+    "model": "<model and backbone>",
+    "input_or_sequence": "<input or temporal context>",
+    "reported_metrics": ["<metric>"],
+    "source_location": "<paper section or table>"
+  },
+  "reference_experiment_scheme": {
+    "dataset": "<dataset>",
+    "split": "<split>",
+    "training": "<training protocol>",
+    "evaluation": "<evaluation protocol>",
+    "metrics": ["<metric>"],
+    "ablation": "<reported ablation scheme>",
+    "source_location": "<paper section or table>"
+  },
+  "final_experiment_scheme": {
+    "method": "<final method>",
+    "dataset": "<dataset>",
+    "split": "<split>",
+    "training": "<training protocol>",
+    "evaluation": "<evaluation protocol>",
+    "metrics": ["<metric>"],
+    "ablation_plan": "<ablation plan>",
+    "experiment_matrix_sha256": "<sha256 of current experiment_matrix.json>"
+  },
+  "comparison_table": [
+    {
+      "dimension_key": "model_baseline",
+      "dimension": "Model/baseline",
+      "reference_paper": "<reference description>",
+      "final_scheme": "<final scheme description>",
+      "decision_or_difference": "<why this is fixed or changed>",
+      "source_location": "<paper/plan section>",
+      "comparable": true
+    }
+  ]
+}
+```
+
+The gate checks the declared sources and fields; it does not independently
+authenticate a journal ranking or impact factor. The human reviewer must check
+those source records before approving the innovation package. A conference may
+be used only through its separate quality record: full/regular paper type,
+peer-review evidence, proceedings source and a documented venue-standing
+basis. It must not be assigned a journal impact factor or CAS quartile. A
+missing, ineligible or incomplete baseline record keeps the workflow at
+`human_innovation_review` and prevents compute allocation and execution.
 
 ## Review records
 
@@ -93,6 +180,9 @@ Innovation review:
   "source_thread_id": "<thread>",
   "user_quote": "<user's review text>",
   "edit_summary": "<what changed>",
+  "baseline_eligibility_checked": true,
+  "protocol_comparison_checked": true,
+  "conference_quality_confirmed": false,
   "package_sha256": {"<package field>": "<sha256>"},
   "card_sha256": "<sha256>"
 }

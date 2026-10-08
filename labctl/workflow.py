@@ -120,7 +120,7 @@ def state(root: str | Path, experiment_id: str) -> dict[str, Any]:
         innovation_gate = gates["innovation_review"]
         if not innovation_gate["valid"]:
             return {**base, "state": "human_innovation_review", "next_stage": None,
-                    "next_action": "manually edit and approve the innovation package, then record its file hashes",
+                    "next_action": "manually review the eligible baseline paper, its baseline and experiment scheme, the comparison table, then edit and approve the innovation package",
                     "blockers": innovation_gate["errors"]}
         allocation_gate = gates["compute_allocation"]
         if not allocation_gate["valid"]:
