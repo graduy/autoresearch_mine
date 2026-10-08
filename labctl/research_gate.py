@@ -27,6 +27,8 @@ BASELINE_COMPARISON_KEYS = {
     "model_baseline", "data_split", "training_protocol",
     "evaluation_metrics", "ablation_protocol",
 }
+RESEARCH_STRATEGY = "reference_first_reproduction_and_extension"
+MATRIX_STRATEGY_ROLES = {"reference_reproduction", "recent_extension", "ablation"}
 WAITING_STATES = {
     "innovation_package", "human_innovation_review", "human_compute_allocation",
     "human_approval", "blocked", "candidate_rejected", "experiment_matrix",
@@ -159,6 +161,11 @@ def validate_baseline_reference(root: str | Path, card: dict[str, Any]) -> dict[
     if payload is None:
         return _result(errors, path=str(path) if path else None, reference=None, comparison_table=[])
 
+    if payload.get("research_strategy") != RESEARCH_STRATEGY:
+        errors.append(f"baseline_reference.research_strategy must be {RESEARCH_STRATEGY}")
+    if payload.get("publication_positioning") != "reproduction_plus_controlled_extension":
+        errors.append("baseline_reference.publication_positioning must be reproduction_plus_controlled_extension")
+
     paper = payload.get("paper")
     _required_text_fields(
         paper, "baseline_reference.paper",
@@ -226,6 +233,23 @@ def validate_baseline_reference(root: str | Path, card: dict[str, Any]) -> dict[
     if isinstance(reference_scheme, dict):
         _required_text_list(reference_scheme.get("metrics"),
                             "baseline_reference.reference_experiment_scheme.metrics", errors)
+
+    reproduction = payload.get("reference_reproduction")
+    _required_text_fields(
+        reproduction, "baseline_reference.reference_reproduction",
+        ("protocol_lock", "allowed_deviations", "acceptance_rule", "source_location"), errors,
+    )
+
+    extension = payload.get("recent_extension")
+    _required_text_fields(
+        extension, "baseline_reference.recent_extension",
+        ("method", "source", "change_scope", "replacement_target", "source_location"), errors,
+    )
+    if isinstance(extension, dict) and not _valid_year(extension.get("publication_year")):
+        errors.append("baseline_reference.recent_extension.publication_year must be a valid year")
+    if isinstance(extension, dict) and _valid_year(extension.get("publication_year")):
+        if extension["publication_year"] < datetime.now().year - 2:
+            errors.append("baseline_reference.recent_extension must be from the current or previous two publication years")
 
     final_scheme = payload.get("final_experiment_scheme")
     _required_text_fields(
@@ -318,7 +342,7 @@ def validate_innovation_package(root: str | Path, card: dict[str, Any]) -> dict[
         if not isinstance(row, dict):
             errors.append(f"experiment_matrix row {index} must be an object")
             continue
-        for key in ("id", "category", "hypothesis", "control", "change", "metric", "pass_rule", "experiment_id", "stage"):
+        for key in ("id", "category", "strategy_role", "hypothesis", "control", "change", "metric", "pass_rule", "experiment_id", "stage"):
             if not _text(row.get(key)):
                 errors.append(f"experiment_matrix row {index} needs {key}")
         category = row.get("category")
@@ -326,6 +350,13 @@ def validate_innovation_package(root: str | Path, card: dict[str, Any]) -> dict[
             errors.append(f"experiment_matrix row {index}: category must be verification or ablation")
         else:
             categories.add(category)
+        role = row.get("strategy_role")
+        if role not in MATRIX_STRATEGY_ROLES:
+            errors.append(f"experiment_matrix row {index}: strategy_role must be one of {sorted(MATRIX_STRATEGY_ROLES)}")
+        elif role == "reference_reproduction" and row.get("stage") != "baseline":
+            errors.append(f"experiment_matrix row {index}: reference_reproduction must run at baseline stage")
+        elif role == "recent_extension" and row.get("stage") == "baseline":
+            errors.append(f"experiment_matrix row {index}: recent_extension must follow baseline reproduction")
         if category == "ablation" and not _text(row.get("component")):
             errors.append(f"experiment_matrix ablation row {index} needs component")
         row_id = row.get("id")
@@ -354,6 +385,10 @@ def validate_innovation_package(root: str | Path, card: dict[str, Any]) -> dict[
     for category in ("verification", "ablation"):
         if category not in categories:
             errors.append(f"experiment_matrix needs at least one {category} row")
+    roles = {row.get("strategy_role") for row in rows if isinstance(row, dict)}
+    for role in ("reference_reproduction", "recent_extension"):
+        if role not in roles:
+            errors.append(f"experiment_matrix needs a {role} row")
     if matrix is not None and _placeholder(matrix):
         errors.append("experiment_matrix contains a placeholder")
     return _result(
@@ -392,7 +427,8 @@ def validate_innovation_review(root: str | Path, card: dict[str, Any]) -> dict[s
     payload = _json(review_paths(root, card)["innovation"], "innovation review", errors)
     if payload is not None:
         _approval(payload, "innovation", errors, edited=True)
-        for field in ("baseline_eligibility_checked", "protocol_comparison_checked"):
+        for field in ("baseline_eligibility_checked", "reference_reproduction_checked",
+                      "recent_extension_checked", "protocol_comparison_checked"):
             if payload.get(field) is not True:
                 errors.append(f"innovation: {field}=true is required in the first human review")
         reference = package["baseline_reference"].get("reference") or {}

@@ -22,6 +22,11 @@ literature_scan
 A card may omit pilot or full for a deliberately smaller experiment, but the
 remaining stages keep their order. `innovation_package` must include:
 
+- the strategy declaration `reference_first_reproduction_and_extension`:
+  reproduce the selected paper's baseline and protocol first, then replace one
+  declared component with a recent method from the current or previous two
+  publication years; this is a controlled extension, not an independent
+  architecture claim;
 - a literature synthesis and one concrete innovation direction;
 - a source-backed baseline paper record in `baseline_reference.json`. For a
   journal, the default qualification is SCI/SCIE indexed, Chinese Academy of
@@ -38,8 +43,11 @@ remaining stages keep their order. `innovation_package` must include:
   draft;
 - an `experiment_matrix.json` with both `verification` and `ablation` rows.
 
-Each matrix row names `id`, `category`, `experiment_id`, `stage`, unique integer
-`seeds`, `hypothesis`, `control`, `change`, `metric` and `pass_rule`. The card
+Each matrix row names `id`, `category`, `strategy_role`, `experiment_id`,
+`stage`, unique integer `seeds`, `hypothesis`, `control`, `change`, `metric` and
+`pass_rule`. `strategy_role` is `reference_reproduction`, `recent_extension`
+or `ablation`. The reproduction row must run at `baseline`; the extension row
+must run after that baseline stage. The card
 named by `experiment_id` must exist, declare the row's stage and use the same
 primary metric. An ablation row also names the removed or replaced `component`.
 This binds the validity check and ablation to executable cards rather than to a
@@ -95,6 +103,8 @@ first human review:
 
 ```json
 {
+  "research_strategy": "reference_first_reproduction_and_extension",
+  "publication_positioning": "reproduction_plus_controlled_extension",
   "paper": {
     "title": "<paper title>",
     "venue": "<journal, conference or other publication venue>",
@@ -132,6 +142,20 @@ first human review:
     "ablation": "<reported ablation scheme>",
     "source_location": "<paper section or table>"
   },
+  "reference_reproduction": {
+    "protocol_lock": "<what is copied exactly from the reference paper>",
+    "allowed_deviations": "<only environment deviations and their reason>",
+    "acceptance_rule": "<predeclared reproduction tolerance>",
+    "source_location": "<paper methods and experiment sections>"
+  },
+  "recent_extension": {
+    "method": "<one recent method>",
+    "source": "<recent paper source>",
+    "publication_year": 2025,
+    "change_scope": "<single changed component>",
+    "replacement_target": "<reference component being replaced>",
+    "source_location": "<recent paper and extension plan>"
+  },
   "final_experiment_scheme": {
     "method": "<final method>",
     "dataset": "<dataset>",
@@ -164,6 +188,12 @@ peer-review evidence, proceedings source and a documented venue-standing
 basis. It must not be assigned a journal impact factor or CAS quartile. A
 missing, ineligible or incomplete baseline record keeps the workflow at
 `human_innovation_review` and prevents compute allocation and execution.
+
+The publication position is recorded as a reproduction plus controlled
+extension. The workflow may prepare a paper draft only after the reference
+protocol is reproduced, the recent replacement is compared under the same
+data/evaluator, and the ablation and multi-seed evidence support the claim.
+This workflow does not promise acceptance or publication.
 
 ## Review records
 

@@ -22,6 +22,10 @@ than 4, the paper's baseline and experiment scheme, a
 structured comparison table against the final scheme, an estimated compute
 budget, a source-grounded architecture specification and reviewable raster
 draft, and an experiment matrix with both `verification` and `ablation` rows.
+Its core strategy is reference-first reproduction: reproduce the paper's
+baseline and protocol, then introduce one recent method as a controlled
+extension. It does not start by claiming a new architecture, and it does not
+guarantee publication.
 The comparison table is included in the first human-review payload. The next
 two states are separate human gates. The innovation review records the human
 edit, reviewed file hashes and source user message. The compute allocation records exact GPU,

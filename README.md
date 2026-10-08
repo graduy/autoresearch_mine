@@ -19,6 +19,9 @@ metric, timeout, artifact capture, acceptance rule, and stop conditions.
   multi-seed evidence, and an independent test when the project has one.
 - Missing evidence becomes `TBD`; the report generator never invents metrics.
 - New managed cards use a human-gated research-to-paper workflow: the
+  reference paper is reproduced first, then one recent method is substituted
+  under the same protocol as a controlled extension; the workflow does not
+  assume that this guarantees publication. The package also requires an
   eligible SCI/SCIE journal baseline paper in Chinese Academy of Sciences
   major-category 1 or 2 (impact factor > 4), its baseline and
   experiment scheme, the final-scheme comparison table, innovation direction,

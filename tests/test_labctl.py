@@ -26,6 +26,7 @@ def _human_gated_fixture(tmp_path: Path) -> tuple[Path, dict]:
         "metric_direction": "maximize",
         "stages": {
             "baseline": {"command": ["python", "-V"], "metric_pattern": r"Python ([0-9.]+)"},
+            "pilot": {"command": ["python", "-V"], "metric_pattern": r"Python ([0-9.]+)"},
         },
         "constraints": {"max_runs": 4, "max_runtime_seconds": 60},
         "human_approval": {"required": True},
@@ -57,12 +58,15 @@ def _write_human_package(root: Path, card: dict) -> dict[str, str]:
     (package / "innovation.md").write_text("Use the proposed module under the locked evaluator and compare it with the baseline.", encoding="utf-8")
     (package / "compute.json").write_text(json.dumps({"estimated_gpu_hours": 2, "estimated_runs": 4, "assumptions": "One local GPU per run."}), encoding="utf-8")
     (package / "matrix.json").write_text(json.dumps({"rows": [
-        {"id": "V1", "category": "verification", "experiment_id": "gated-e1", "stage": "baseline", "seeds": [1], "hypothesis": "The full method improves score.", "control": "locked baseline", "change": "full method", "metric": "score", "pass_rule": "full score exceeds baseline"},
-        {"id": "A1", "category": "ablation", "experiment_id": "gated-e1", "stage": "baseline", "seeds": [1], "component": "proposed module", "hypothesis": "Removing the module reduces score.", "control": "full method", "change": "remove proposed module", "metric": "score", "pass_rule": "ablation score decreases"},
+        {"id": "V1", "category": "verification", "strategy_role": "reference_reproduction", "experiment_id": "gated-e1", "stage": "baseline", "seeds": [1], "hypothesis": "The reference protocol reproduces the baseline.", "control": "paper baseline", "change": "faithful reproduction", "metric": "score", "pass_rule": "reproduction meets the declared acceptance rule"},
+        {"id": "V2", "category": "verification", "strategy_role": "recent_extension", "experiment_id": "gated-e1", "stage": "pilot", "seeds": [1], "hypothesis": "The recent method improves the reproduced baseline.", "control": "reproduced baseline", "change": "single recent replacement", "metric": "score", "pass_rule": "extension passes the predeclared comparison rule"},
+        {"id": "A1", "category": "ablation", "strategy_role": "ablation", "experiment_id": "gated-e1", "stage": "pilot", "seeds": [1], "component": "recent module", "hypothesis": "Removing the recent module identifies its contribution.", "control": "recent extension", "change": "remove recent module", "metric": "score", "pass_rule": "ablation is interpreted with the paired extension"},
     ]}), encoding="utf-8")
     (package / "architecture.md").write_text("Inputs -> proposed module -> evaluator", encoding="utf-8")
     (package / "architecture.png").write_bytes(b"\x89PNG\r\n\x1a\narchitecture draft")
     (package / "baseline_reference.json").write_text(json.dumps({
+        "research_strategy": "reference_first_reproduction_and_extension",
+        "publication_positioning": "reproduction_plus_controlled_extension",
         "paper": {
             "title": "A source-backed baseline paper",
             "venue": "Journal of Controlled Research",
@@ -100,6 +104,20 @@ def _write_human_package(root: Path, card: dict) -> dict[str, str]:
             "ablation": "Reference ablation protocol",
             "source_location": "paper section 4",
         },
+        "reference_reproduction": {
+            "protocol_lock": "Use the paper dataset split, preprocessing, training schedule and evaluator before any extension.",
+            "allowed_deviations": "Only environment differences are recorded and justified.",
+            "acceptance_rule": "Reproduction must satisfy the predeclared metric tolerance before extension runs.",
+            "source_location": "paper methods and experiment sections",
+        },
+        "recent_extension": {
+            "method": "A single recent module selected after the reference reproduction",
+            "source": "Recent peer-reviewed method record",
+            "publication_year": 2025,
+            "change_scope": "Replace one declared component while keeping the reference protocol fixed.",
+            "replacement_target": "The selected baseline module",
+            "source_location": "recent method paper and extension plan",
+        },
         "final_experiment_scheme": {
             "method": "Proposed method",
             "dataset": "Same locked dataset",
@@ -131,6 +149,8 @@ def _write_innovation_review(root: Path, package_hashes: dict[str, str]) -> None
         "source_thread_id": "test-thread", "user_quote": "I reviewed and approved the edited innovation package.",
         "edit_summary": "Adjusted the proposed module and fixed the ablation pass rule.",
         "baseline_eligibility_checked": True,
+        "reference_reproduction_checked": True,
+        "recent_extension_checked": True,
         "protocol_comparison_checked": True,
         "conference_quality_confirmed": False,
         "package_sha256": package_hashes,
@@ -321,6 +341,14 @@ def test_human_conclusion_review_controls_bilingual_drafts(tmp_path):
     receipt.parent.mkdir(parents=True, exist_ok=True)
     receipt.write_text(json.dumps({"status": "keep"}), encoding="utf-8")
     ledger.finish_run("gated-baseline", {"status": "keep", "exit_code": 0, "metric": 1.0, "runtime_seconds": 1.0, "receipt_path": str(receipt)})
+    ledger.start_run({
+        "run_id": "gated-pilot", "experiment_id": card["experiment_id"], "stage": "pilot",
+        "seed": 1, "command": ["test"], "run_dir": str(root / "runs"),
+    })
+    pilot_receipt = root / "runs/gated-pilot/receipt.json"
+    pilot_receipt.parent.mkdir(parents=True, exist_ok=True)
+    pilot_receipt.write_text(json.dumps({"status": "keep"}), encoding="utf-8")
+    ledger.finish_run("gated-pilot", {"status": "keep", "exit_code": 0, "metric": 1.1, "runtime_seconds": 1.0, "receipt_path": str(pilot_receipt)})
     assert state(root, card["experiment_id"])["state"] == "conclusion_review"
 
     package = build_package(root, card["experiment_id"])
