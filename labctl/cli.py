@@ -14,6 +14,7 @@ from .report import draft_report
 from .figures import write_figures
 from .runner import archive_experiment, card_path, project_config, run_stage
 from .workflow import state as workflow_state, validate_ingest
+from .output_protocol import checkpoint_status
 from .storage import (
     add_code, add_reference, audit as storage_audit, bind_card, capture_asset,
     confirm_task, init_workspace, new_task, sync_experiment, workspace_root,
@@ -134,6 +135,8 @@ def build_parser() -> argparse.ArgumentParser:
     capture.add_argument("--name", required=True)
     storage_audit_command = storage_sub.add_parser("audit")
     storage_audit_command.add_argument("--task")
+    storage_status_command = storage_sub.add_parser("status")
+    storage_status_command.add_argument("--task", required=True)
     sync = storage_sub.add_parser("sync-run")
     sync.add_argument("--experiment", required=True)
     return parser
@@ -253,6 +256,9 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.storage_command == "audit":
             print(json.dumps(storage_audit(archive_root, args.task), ensure_ascii=False, indent=2))
+            return 0
+        if args.storage_command == "status":
+            print(json.dumps(checkpoint_status(archive_root, args.task, root), ensure_ascii=False, indent=2))
             return 0
         if args.storage_command == "sync-run":
             print(sync_experiment(archive_root, root, args.experiment))

@@ -4,6 +4,12 @@
 `labctl storage bind-card`. It controls the path from literature research to a
 Chinese and English paper first draft.
 
+Every archive task also copies `workflow/output_protocol.json` to
+`manifests/output_protocol.json`. The fixed-output contract and directory map
+are documented in `workflow/OUTPUT_PROTOCOL.md`. A new agent must run
+`labctl storage status --task <task-id>` first and resume at the first incomplete
+output; later files never authorize skipping an earlier stage.
+
 ## Required order
 
 ```text
@@ -72,6 +78,10 @@ limit and cost limit. It binds to the innovation-review hash. The runner uses
 the stricter value when both the card and allocation specify a limit. No run or
 server record is admitted while this gate is missing, incomplete, stale or
 contains a placeholder.
+
+GPU selection is task-specific. `config/gpu_catalog.json` records the current
+user-provided rental list; the selected model is written into the proposal and
+human allocation. The workflow does not assume a fixed RTX 4060 card.
 
 After the declared experiment rows finish, the workflow stops at
 `conclusion_review`. The human checks the current evidence snapshot and writes

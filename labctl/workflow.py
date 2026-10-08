@@ -7,6 +7,7 @@ from typing import Any
 from .card import load_card
 from .io import read_json
 from .ledger import Ledger
+from .output_protocol import checkpoint_status
 from .research_gate import gate_snapshot, is_human_gated
 
 
@@ -94,6 +95,9 @@ def state(root: str | Path, experiment_id: str) -> dict[str, Any]:
     report_path = root / "reports" / f"{experiment_id}-draft.md"
     archive_path = root / "artifacts" / "archives" / experiment_id
     gates = gate_snapshot(root, card, runs)
+    checkpoint = None
+    if card.get("task_id") and card.get("workspace_root"):
+        checkpoint = checkpoint_status(card["workspace_root"], card["task_id"], root, experiment_id)
 
     base = {
         "experiment_id": experiment_id,
@@ -109,6 +113,7 @@ def state(root: str | Path, experiment_id: str) -> dict[str, Any]:
             "declared_seeds": card.get("seeds", []),
         },
         "gates": gates,
+        "checkpoint": checkpoint,
     }
 
     if is_human_gated(card, root):

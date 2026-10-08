@@ -67,12 +67,12 @@ def _write_human_package(root: Path, card: dict) -> dict[str, str]:
         "schedule_basis": "Three matrix rows each use four GPUs for two hours; the wall-clock recommendation includes scheduling margin.",
         "budget_summary": {
             "total_experiments": 3,
-            "gpu_type": "RTX 4060",
+            "gpu_type": "4090-24G",
             "required_gpu_count": 4,
             "wall_clock_hours": 6,
             "recommended_gpu_count": 4,
             "recommended_hours": 6,
-            "recommended_rental": "推荐租4张RTX 4060，运行6小时",
+            "recommended_rental": "推荐租4张4090-24G，运行6小时",
         },
         "run_estimates": [
             {"row_id": "V1", "seed": 1, "gpu_count": 4, "hours": 2, "estimate_source": "baseline reproduction estimate"},
@@ -205,9 +205,9 @@ def _write_compute_review(root: Path) -> None:
     digest = hashlib.sha256(innovation.read_bytes()).hexdigest()
     (root / "approvals/gated/compute.json").write_text(json.dumps({
         "decision": "approve", "human_reviewed": True, "reviewer": "tester", "actor": "user",
-        "reviewed_at": "2026-10-06T10:05:00+08:00", "allocation_basis": "Local RTX 4060 reservation.",
+        "reviewed_at": "2026-10-06T10:05:00+08:00", "allocation_basis": "Local 4090-24G reservation.",
         "source_thread_id": "test-thread", "user_quote": "I provided the exact compute allocation.",
-        "innovation_review_sha256": digest, "gpu_type": "RTX 4060", "gpu_count": 4,
+        "innovation_review_sha256": digest, "gpu_type": "4090-24G", "gpu_count": 4,
         "vram_gb": 8, "max_gpu_hours": 2, "max_runtime_seconds": 60,
         "max_runs": 4, "max_vram_gb": 8, "max_cost_usd": 0,
     }), encoding="utf-8")
@@ -358,7 +358,7 @@ def test_human_gated_workflow_requires_package_reviews_and_allocation(tmp_path):
     assert baseline_review["valid"] is True
     assert len(baseline_review["comparison_table"]) == 5
     assert first_review["gates"]["innovation_package"]["compute_budget"]["summary_text"] == (
-        "共有 3 个实验需要跑；需要 4 张 RTX 4060 跑 6 小时；推荐租 4 张 RTX 4060，运行 6 小时。"
+        "共有 3 个实验需要跑；需要 4 张 4090-24G 跑 6 小时；推荐租 4 张 4090-24G，运行 6 小时。"
     )
     _write_innovation_review(root, hashes)
     assert state(root, card["experiment_id"])["state"] == "human_compute_allocation"

@@ -8,4 +8,8 @@
 
 当前代码、数据与权重的边界保持分离：代码快照只登记 Git 提交和源文件哈希，不复制数据集、凭据或模型权重。实验运行结果通过 `storage sync-run` 镜像到课题目录；原始日志和完整性回执以实验执行层为准。
 
-使用 `PYTHONPATH=/home/grady/agent/autoresearch-lab python3 -m labctl storage audit` 检查清单。发现哈希变化时创建新版本，禁止覆盖旧证据。
+使用 `PYTHONPATH=/home/grady/agent/autoresearch_mine python3 -m labctl storage audit` 检查清单。发现哈希变化时创建新版本，禁止覆盖旧证据。
+
+每个新课题还会复制 `manifests/output_protocol.json`。使用
+`PYTHONPATH=/home/grady/agent/autoresearch_mine python3 -m labctl storage status --task <task-id>`
+查看第一个缺失的固定产出；新 agent 从该检查点继续。

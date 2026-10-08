@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from labctl.storage import add_code, add_reference, audit, bind_card, init_workspace, new_task
+from labctl.output_protocol import checkpoint_status
 
 
 def _git_repo(tmp_path: Path) -> Path:
@@ -26,12 +27,17 @@ def test_storage_registers_references_and_immutable_code(tmp_path):
     init_workspace(root, lab)
     task = new_task(root, "Test task", "test-task")
     task_id = task.name
+    assert (task / "manifests/output_protocol.json").is_file()
+    assert checkpoint_status(root, task_id, lab)["current_stage"] == "literature_scan"
     metadata = {
         "key": "test-paper", "title": "Test paper", "year": 2026,
         "url": "https://example.com/paper", "kind": "paper", "reading_level": "abstract",
     }
     record = add_reference(root, metadata, task_id)
     assert record["reference_id"] == "REF-2026-test-paper"
+    assert checkpoint_status(root, task_id, lab)["current_stage"] == "relevance_screen"
+    (task / "plans/relevance_screen.json").write_text(json.dumps({"records": [record]}), encoding="utf-8")
+    assert checkpoint_status(root, task_id, lab)["current_stage"] == "innovation_package"
     repo = _git_repo(tmp_path)
     code = add_code(root, task_id, repo, "HEAD", "baseline", "test-baseline")
     assert code["commit"]

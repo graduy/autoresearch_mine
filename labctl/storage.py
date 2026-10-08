@@ -20,6 +20,7 @@ from zoneinfo import ZoneInfo
 
 from .integrity import git, sha256_file
 from .io import read_json, write_json
+from .output_protocol import materialize_protocol
 
 SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 TASK_ID = re.compile(r"^AR-[0-9]{8}-[0-9]{3}-[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -114,6 +115,8 @@ def new_task(root: Path, title: str, slug: str, status: str = "proposed") -> Pat
     if status not in {"proposed", "historical"}:
         raise ValueError("new work must start proposed; legacy imports may be historical")
     with locked(root):
+        workspace = read_json(root / "workspace.json")
+        lab = Path(workspace["lab_root"])
         date = datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%Y%m%d")
         existing = [int(item["task_id"].split("-")[2]) for item in tasks(root)
                     if item["task_id"].startswith(f"AR-{date}-")]
@@ -139,10 +142,13 @@ def new_task(root: Path, title: str, slug: str, status: str = "proposed") -> Pat
             "- paper/zh 与 paper/en：中文版、英文版可编辑初稿及导出件。\n"
             "- figures/ 与 ppt/：草图、批准稿、可编辑源文件和导出件。\n"
             "- approvals/、manifests/、archive/：人工批准、哈希清单、历史归档。\n\n"
+            "manifests/output_protocol.json 固定每一步的产出和完成条件；先执行 `labctl storage status --task "
+            f"{task_id}`，从 current_stage 指定的第一个缺口继续。\n"
             "先提交 plans/baseline_reference.json、plans/innovation_proposal.md 与 plans/compute_budget.json，等待用户明确批准。\n",
             encoding="utf-8")
         for name in ("references", "code", "experiments", "assets"):
             write_json(target / f"manifests/{name}.json", {"records": []})
+        materialize_protocol(target, lab, task_id)
         index(root)
     return target
 

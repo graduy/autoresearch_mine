@@ -68,3 +68,13 @@ they are not retroactively presented as having passed the new gates.
 The default three-CV/three-ML discovery scope is in
 `config/research_sources.json`; topic cards may customize it with a recorded
 basis and local implementation paths.
+
+The GPU catalog supplied for current rental planning is in
+`config/gpu_catalog.json`. The budget records the selected model, required
+parallel cards, wall-clock hours and recommended rental; the model is selected
+per task rather than fixed to RTX 4060.
+
+The fixed-output checkpoint contract is in `workflow/OUTPUT_PROTOCOL.md` and
+`workflow/output_protocol.json`. A new agent resumes with
+`labctl storage status --task <task-id>`; it continues from the first incomplete
+output and leaves later stages untouched.

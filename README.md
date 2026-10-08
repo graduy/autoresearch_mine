@@ -88,6 +88,11 @@ over the previous two publication years. A task may customize the three-plus-
 three venue sets, but must record the selection basis and local code paths in
 `baseline_reference.local_code_library`.
 
+GPU selection is also configurable. The user-provided current rental catalog is
+recorded in `config/gpu_catalog.json`; each task chooses a card from the
+available list using its actual VRAM, runtime and parallelism needs. The
+workflow never assumes RTX 4060.
+
 ```bash
 PYTHONPATH=. python3 -m labctl storage init
 PYTHONPATH=. python3 -m labctl storage task create \
